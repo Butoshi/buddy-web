@@ -333,7 +333,7 @@ function DownloadContent() {
             </Link>
             <span className="text-muted">•</span>
             <Link href="#" className="text-primary hover:text-accent transition-colors">
-              Join Discord
+              Follow on Twitter
             </Link>
           </div>
         </div>

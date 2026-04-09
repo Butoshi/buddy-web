@@ -18,15 +18,15 @@ const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
 
 // Features list
 const features = [
-  "Agent AI autonome pour PumpFun",
-  "Détection automatique de tokens",
-  "Décisions AI (Buy/Sell/Skip)",
-  "Dashboard temps réel",
-  "Take-profit & Stop-loss auto",
-  "Fonctionne 100% localement",
-  "Vos clés restent sur votre PC",
-  "Mises à jour à vie",
-  "Support Discord privé",
+  "Autonomous AI Agent for PumpFun",
+  "Automatic token detection",
+  "AI Decisions (Buy/Sell/Skip)",
+  "Real-time dashboard",
+  "Auto take-profit & stop-loss",
+  "Runs 100% locally",
+  "Your keys stay on your PC",
+  "Lifetime updates",
+  "Private Telegram group (lifetime support)",
 ];
 
 export default function PricingSolana() {

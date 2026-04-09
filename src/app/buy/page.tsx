@@ -310,7 +310,7 @@ export default function BuyPage() {
 
         {/* Help */}
         <p className="text-center text-muted mt-8">
-          Need help? <a href="https://discord.gg" className="text-primary hover:text-accent">Join our Discord</a>
+          Need help? <a href="#" className="text-primary hover:text-accent">Follow us on Twitter</a>
         </p>
         </>
         )}
