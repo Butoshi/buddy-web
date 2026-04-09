@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { name: "Features", href: "#features" },
@@ -14,6 +15,7 @@ const navLinks = [
 export default function NavbarPro() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, loading, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,7 +74,28 @@ export default function NavbarPro() {
 
             {/* Desktop CTA */}
             <div className="hidden lg:flex items-center gap-4">
-              <Link href="#pricing" className="group relative">
+              {!loading && !user && (
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-sm font-medium text-muted hover:text-white transition-colors"
+                >
+                  Login
+                </Link>
+              )}
+              {!loading && user && (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-muted truncate max-w-[150px]">
+                    {user.email}
+                  </span>
+                  <button
+                    onClick={() => signOut()}
+                    className="px-3 py-1.5 text-sm font-medium text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+              <Link href="/buy" className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-xl blur opacity-50 group-hover:opacity-75 transition" />
                 <div className="relative px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold flex items-center gap-2">
                   Buy Now - 6 SOL
@@ -162,8 +185,31 @@ export default function NavbarPro() {
               </div>
 
               <div className="mt-8 pt-8 border-t border-white/5 space-y-4">
+                {!loading && !user && (
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block w-full px-4 py-3 rounded-xl text-center font-semibold bg-white/5 hover:bg-white/10 transition-colors"
+                  >
+                    Login
+                  </Link>
+                )}
+                {!loading && user && (
+                  <div className="px-4 py-3 rounded-xl bg-white/5">
+                    <p className="text-sm text-muted truncate mb-2">{user.email}</p>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
                 <Link
-                  href="#pricing"
+                  href="/buy"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block w-full px-4 py-3 rounded-xl text-center font-semibold btn-glow text-white"
                 >
