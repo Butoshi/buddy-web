@@ -238,44 +238,50 @@ export default function PricingSolana() {
               </div>
             )}
 
-            {/* Login Required Check */}
-            {!loading && !user ? (
-              <div className="text-center py-8">
-                <div className="w-20 h-20 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            {/* Content wrapper - always show content, blur if not logged in */}
+            <div className="relative">
+              {/* Login Required Overlay */}
+              {!loading && !user && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-card/80 backdrop-blur-md rounded-2xl" />
+                  <div className="relative text-center p-8">
+                    <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-2xl font-black mb-2">Sign in to Purchase</h3>
+                    <p className="text-muted mb-6 max-w-sm mx-auto text-sm">
+                      Create an account to buy Buddy AI and save your license
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link
+                        href="/login"
+                        className="py-3 px-6 rounded-xl bg-white/10 hover:bg-white/20 transition-colors font-semibold text-center"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/register"
+                        className="py-3 px-6 rounded-xl btn-glow text-white font-semibold text-center"
+                      >
+                        Create Account
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading Overlay */}
+              {loading && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-2xl">
+                  <svg className="w-8 h-8 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-black mb-3">Account Required</h3>
-                <p className="text-muted mb-6 max-w-md mx-auto">
-                  Create an account or sign in to purchase Buddy AI. This allows us to save your license and provide support.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-sm mx-auto">
-                  <Link
-                    href="/login"
-                    className="flex-1 py-4 px-6 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-semibold text-center"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="flex-1 py-4 px-6 rounded-xl btn-glow text-white font-semibold text-center"
-                  >
-                    Create Account
-                  </Link>
-                </div>
-                <p className="text-sm text-muted mt-6">
-                  Price: <span className="text-primary font-bold">{currentPrice} SOL</span> (~${currentPrice * 80} USD)
-                </p>
-              </div>
-            ) : loading ? (
-              <div className="flex justify-center py-16">
-                <svg className="w-8 h-8 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-              </div>
-            ) : (
+              )}
+
             <div className="grid md:grid-cols-2 gap-8 mt-4">
               {/* Left: Price and QR */}
               <div className="flex flex-col items-center">
@@ -462,7 +468,7 @@ export default function PricingSolana() {
                 </div>
               </div>
             </div>
-            )}
+            </div>
           </div>
         </motion.div>
 
