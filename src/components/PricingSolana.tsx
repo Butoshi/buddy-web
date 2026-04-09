@@ -243,7 +243,7 @@ export default function PricingSolana() {
               {/* Login Required Overlay */}
               {!loading && !user && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-card/80 backdrop-blur-md rounded-2xl" />
+                  <div className="absolute inset-0 bg-card/40 backdrop-blur-[2px] rounded-2xl" />
                   <div className="relative text-center p-8">
                     <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                       <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
