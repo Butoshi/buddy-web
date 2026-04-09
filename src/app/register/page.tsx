@@ -73,13 +73,12 @@ export default function RegisterPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold mb-2">Check Your Email</h2>
+          <h2 className="text-2xl font-bold mb-2">Account Created!</h2>
           <p className="text-muted mb-6">
-            We&apos;ve sent a confirmation link to <span className="text-white">{formData.email}</span>.
-            Click the link to activate your account.
+            Your account has been created successfully. You can now sign in and start using Buddy.
           </p>
           <Link href="/login" className="btn-glow text-white px-6 py-3 rounded-xl font-semibold inline-block">
-            Go to Login
+            Sign In
           </Link>
         </motion.div>
       </div>
