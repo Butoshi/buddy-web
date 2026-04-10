@@ -84,9 +84,12 @@ export default function NavbarPro() {
               )}
               {!loading && user && (
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted truncate max-w-[150px]">
+                  <Link
+                    href="/profile"
+                    className="text-sm text-muted hover:text-white transition-colors truncate max-w-[150px]"
+                  >
                     {user.email}
-                  </span>
+                  </Link>
                   <button
                     onClick={() => signOut()}
                     className="px-3 py-1.5 text-sm font-medium text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors"
