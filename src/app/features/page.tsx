@@ -203,7 +203,7 @@ export default function FeaturesPage() {
               href="/#pricing"
               className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold"
             >
-              Buy Now - 6 SOL
+              Use Buddy
             </Link>
           </div>
         </div>
@@ -673,7 +673,7 @@ export default function FeaturesPage() {
                   href="/#pricing"
                   className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-accent text-white font-bold text-lg"
                 >
-                  Buy Now - 6 SOL
+                  Use Buddy
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>

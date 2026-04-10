@@ -63,7 +63,7 @@ export default function HeroSimple() {
             href="#pricing"
             className="px-8 py-4 rounded-2xl btn-glow text-white font-bold text-lg flex items-center gap-2"
           >
-            <span>Buy Now - 6 SOL</span>
+            <span>Use Buddy</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

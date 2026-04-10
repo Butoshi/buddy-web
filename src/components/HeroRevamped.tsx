@@ -222,7 +222,7 @@ export default function HeroRevamped() {
               <Link href="#pricing" className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-2xl blur-lg opacity-70 group-hover:opacity-100 transition duration-300" />
                 <div className="relative btn-glow text-white px-10 py-4 rounded-2xl font-bold text-lg flex items-center gap-3">
-                  Buy Now - 6 SOL
+                  Use Buddy
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
