@@ -59,9 +59,9 @@ export default function BuddyLogo({
     const pdx = smoothRef.current.x * maxDX;
     const pdy = smoothRef.current.y * maxDY;
 
-    // Pupil size (horizontal)
-    const pupilW = W * 0.12;
-    const pupilH = H * 0.18;
+    // Pupil size (horizontal) - wider to fill the holes
+    const pupilW = W * 0.18;
+    const pupilH = H * 0.22;
     const pupilR = Math.min(pupilW, pupilH) * 0.4;
 
     // Left eye position (smaller hole of B)
