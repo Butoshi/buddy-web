@@ -19,11 +19,11 @@ export default function BuddyLogo({
   const smoothRef = useRef({ x: 0, y: 0 });
   const lidRef = useRef({ left: 0, right: 0 });
 
-  // Colors - natural look
-  const strokeColor = "#1e3a8a"; // dark blue outline
-  const pupilColor = "#06b6d4";  // cyan pupils
-  const lidColor = "#1e3a8a";    // dark blue eyelids
-  const bgColor = "#ffffff";     // white eye background
+  // Colors - harmonized with site
+  const strokeColor = "#06b6d4"; // cyan outline
+  const pupilColor = "#ffffff";  // white pupils (matches "Buddy" text)
+  const lidColor = "#06b6d4";    // cyan eyelids
+  const bgColor = "transparent"; // transparent to show gradient behind
 
   const drawBuddy = useCallback(() => {
     const canvas = canvasRef.current;
@@ -97,13 +97,10 @@ export default function BuddyLogo({
     drawArch(8, 38, 60, lidRef.current.left);
     drawArch(62, 92, 60, lidRef.current.right);
 
-    // Bottom bar with gradient
-    const gradient = ctx.createLinearGradient(px(3), 0, px(127), 0);
-    gradient.addColorStop(0, strokeColor);
-    gradient.addColorStop(1, pupilColor);
+    // Bottom bar - cyan to match outline
     ctx.beginPath();
     ctx.roundRect(px(3), py(88), px(124), py(12), px(3));
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = strokeColor;
     ctx.fill();
   }, []);
 
