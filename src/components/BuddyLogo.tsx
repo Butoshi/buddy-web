@@ -20,9 +20,9 @@ export default function BuddyLogo({
   const lidRef = useRef({ left: 0, right: 0 });
 
   // Colors - dark theme with contrast
-  const strokeColor = "#06b6d4"; // cyan outline
-  const pupilColor = "#ffffff";  // white pupils (matches "Buddy" text)
-  const lidColor = "#06b6d4";    // cyan eyelids
+  const strokeColor = "#ffffff"; // white outline
+  const pupilColor = "#06b6d4";  // cyan pupils
+  const lidColor = "#ffffff";    // white eyelids
   const bgColor = "#0d1f3c";     // dark blue background for contrast
 
   const drawBuddy = useCallback(() => {
