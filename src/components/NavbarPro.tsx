@@ -101,7 +101,7 @@ export default function NavbarPro() {
               <Link href="/buy" className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-xl blur opacity-50 group-hover:opacity-75 transition" />
                 <div className="relative px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-accent text-white text-sm font-semibold flex items-center gap-2">
-                  Buy Buddy
+                  Use Buddy
                   <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
@@ -216,7 +216,7 @@ export default function NavbarPro() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block w-full px-4 py-3 rounded-xl text-center font-semibold btn-glow text-white"
                 >
-                  Buy Buddy
+                  Use Buddy
                 </Link>
               </div>
 

@@ -42,8 +42,7 @@ export default function RegisterPage() {
       setError(error.message || "Failed to create account");
       setIsLoading(false);
     } else {
-      setSuccess(true);
-      setIsLoading(false);
+      router.push("/buy");
     }
   };
 
