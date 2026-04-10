@@ -19,11 +19,11 @@ export default function BuddyLogo({
   const smoothRef = useRef({ x: 0, y: 0 });
   const lidRef = useRef({ left: 0, right: 0 });
 
-  // Colors - harmonized with site
+  // Colors - dark theme with contrast
   const strokeColor = "#06b6d4"; // cyan outline
   const pupilColor = "#ffffff";  // white pupils (matches "Buddy" text)
   const lidColor = "#06b6d4";    // cyan eyelids
-  const bgColor = "transparent"; // transparent to show gradient behind
+  const bgColor = "#0d1f3c";     // dark blue background for contrast
 
   const drawBuddy = useCallback(() => {
     const canvas = canvasRef.current;
