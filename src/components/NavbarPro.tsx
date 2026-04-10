@@ -6,10 +6,10 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
+  { name: "Home", href: "/" },
   { name: "Features", href: "#features" },
-  { name: "Dashboard", href: "/dashboard" },
   { name: "Pricing", href: "#pricing" },
-  { name: "Learn More", href: "/features" },
+  { name: "Dashboard", href: "/dashboard" },
 ];
 
 export default function NavbarPro() {

@@ -27,7 +27,7 @@ export default function LoginPage() {
       setError(error.message || "Failed to sign in");
       setIsLoading(false);
     } else {
-      router.push("/dashboard");
+      router.push("/profile");
     }
   };
 
