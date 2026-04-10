@@ -68,8 +68,8 @@ export default function BuddyLogo({
     const rightEyeX = W * 0.28;
     const rightEyeY = H * 0.68;
 
-    const pupilW = W * 0.22;
-    const pupilH = H * 0.18;
+    const pupilW = W * 0.28;
+    const pupilH = H * 0.14;
     const pupilR = Math.min(pupilW, pupilH) * 0.3;
 
     // Draw dark background inside eyes
