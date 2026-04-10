@@ -19,11 +19,11 @@ export default function BuddyLogo({
   const smoothRef = useRef({ x: 0, y: 0 });
   const lidRef = useRef({ left: 0, right: 0 });
 
-  // Colors - dark theme with contrast
-  const strokeColor = "#ffffff"; // white outline
+  // Colors
+  const textColor = "#ffffff";   // white B (same as "Buddy" text)
   const pupilColor = "#06b6d4";  // cyan pupils
   const lidColor = "#ffffff";    // white eyelids
-  const bgColor = "#0d1f3c";     // dark blue background for contrast
+  const bgColor = "#0d1f3c";     // dark blue inside eyes
 
   const drawBuddy = useCallback(() => {
     const canvas = canvasRef.current;
@@ -34,74 +34,84 @@ export default function BuddyLogo({
 
     const W = canvas.width;
     const H = canvas.height;
-    const sx = W / 130;
-    const sy = H / 115;
-    const px = (x: number) => x * sx;
-    const py = (y: number) => y * sy;
 
     ctx.clearRect(0, 0, W, H);
 
-    const maxDX = px(7);
-    const maxDY = py(6);
+    // Draw rotated "B" as the eye outline
+    ctx.save();
+    ctx.translate(W / 2, H / 2);
+    ctx.rotate(-Math.PI / 2); // Rotate -90 degrees (counter-clockwise)
+
+    // Font settings - bold/black like "Buddy" text
+    const fontSize = Math.min(W, H) * 1.4;
+    ctx.font = `900 ${fontSize}px system-ui, -apple-system, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Draw the B
+    ctx.fillStyle = textColor;
+    ctx.fillText("B", 0, fontSize * 0.05);
+
+    ctx.restore();
+
+    // Calculate pupil positions (inside the two holes of the B)
+    const maxDX = W * 0.08;
+    const maxDY = H * 0.08;
     const pdx = smoothRef.current.x * maxDX;
     const pdy = smoothRef.current.y * maxDY;
 
-    const drawArch = (x1: number, topX: number, w: number, lidFrac: number) => {
-      ctx.save();
+    // Left eye (top hole of rotated B)
+    const leftEyeX = W * 0.28;
+    const leftEyeY = H * 0.38;
 
-      // Arch shape
-      ctx.beginPath();
-      ctx.moveTo(px(x1), py(95));
-      ctx.lineTo(px(x1), py(48));
-      ctx.quadraticCurveTo(px(x1), py(8), px(topX), py(8));
-      ctx.quadraticCurveTo(px(x1 + w), py(8), px(x1 + w), py(48));
-      ctx.lineTo(px(x1 + w), py(95));
-      ctx.closePath();
-      ctx.fillStyle = bgColor;
-      ctx.fill();
-      ctx.strokeStyle = strokeColor;
-      ctx.lineWidth = px(10);
-      ctx.lineJoin = "round";
-      ctx.stroke();
+    // Right eye (bottom hole of rotated B)
+    const rightEyeX = W * 0.28;
+    const rightEyeY = H * 0.68;
 
-      // Clip interior
-      ctx.beginPath();
-      ctx.moveTo(px(x1 + 5), py(95));
-      ctx.lineTo(px(x1 + 5), py(48));
-      ctx.quadraticCurveTo(px(x1 + 5), py(13), px(topX), py(13));
-      ctx.quadraticCurveTo(px(x1 + w - 5), py(13), px(x1 + w - 5), py(48));
-      ctx.lineTo(px(x1 + w - 5), py(95));
-      ctx.closePath();
-      ctx.clip();
+    const pupilW = W * 0.22;
+    const pupilH = H * 0.18;
+    const pupilR = Math.min(pupilW, pupilH) * 0.3;
 
-      // Pupil - follows mouse
-      const pux = px(x1 + w / 2 - 9) + pdx;
-      const puy = py(52) + pdy;
-      const puw = px(18);
-      const puh = py(22);
-      const r = px(6);
-      ctx.beginPath();
-      ctx.roundRect(pux, puy, puw, puh, r);
-      ctx.fillStyle = pupilColor;
-      ctx.fill();
+    // Draw dark background inside eyes
+    ctx.fillStyle = bgColor;
 
-      // Eyelid
-      if (lidFrac > 0) {
-        ctx.fillStyle = lidColor;
-        ctx.fillRect(px(x1 + 5), py(13), px(w - 10), py(82) * lidFrac);
-      }
-
-      ctx.restore();
-    };
-
-    drawArch(8, 38, 60, lidRef.current.left);
-    drawArch(62, 92, 60, lidRef.current.right);
-
-    // Bottom bar - cyan to match outline
+    // Left eye background (approximate the hole shape)
     ctx.beginPath();
-    ctx.roundRect(px(3), py(88), px(124), py(12), px(3));
-    ctx.fillStyle = strokeColor;
+    ctx.ellipse(leftEyeX + pupilW/2, leftEyeY + pupilH/2, pupilW * 0.7, pupilH * 0.8, 0, 0, Math.PI * 2);
     ctx.fill();
+
+    // Right eye background
+    ctx.beginPath();
+    ctx.ellipse(rightEyeX + pupilW/2, rightEyeY + pupilH/2, pupilW * 0.7, pupilH * 0.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw pupils
+    ctx.fillStyle = pupilColor;
+
+    // Left pupil
+    ctx.beginPath();
+    ctx.roundRect(leftEyeX + pdx, leftEyeY + pdy, pupilW, pupilH, pupilR);
+    ctx.fill();
+
+    // Right pupil
+    ctx.beginPath();
+    ctx.roundRect(rightEyeX + pdx, rightEyeY + pdy, pupilW, pupilH, pupilR);
+    ctx.fill();
+
+    // Eyelids (for blink animation)
+    if (lidRef.current.left > 0) {
+      ctx.fillStyle = lidColor;
+      ctx.beginPath();
+      ctx.ellipse(leftEyeX + pupilW/2, leftEyeY + pupilH/2, pupilW * 0.75, pupilH * 0.85 * lidRef.current.left, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (lidRef.current.right > 0) {
+      ctx.fillStyle = lidColor;
+      ctx.beginPath();
+      ctx.ellipse(rightEyeX + pupilW/2, rightEyeY + pupilH/2, pupilW * 0.75, pupilH * 0.85 * lidRef.current.right, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }, []);
 
   const animateLid = useCallback(
