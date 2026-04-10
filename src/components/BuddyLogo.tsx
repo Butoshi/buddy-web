@@ -1,134 +1,198 @@
 "use client";
 
+import { useEffect, useRef, useCallback } from "react";
+
 interface BuddyLogoProps {
-  size?: number;
+  width?: number;
+  height?: number;
   className?: string;
-  showText?: boolean;
 }
 
-export default function BuddyLogo({ size = 40, className = "", showText = true }: BuddyLogoProps) {
-  return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      {/* Logo :b style - yeux en haut, bouche en bas */}
-      <div
-        className="relative rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden"
-        style={{ width: size, height: size }}
-      >
-        <svg
-          width={size * 0.7}
-          height={size * 0.7}
-          viewBox="0 0 28 28"
-          fill="none"
-        >
-          {/* Yeux - deux points en haut */}
-          <circle cx="9" cy="8" r="3" fill="white" />
-          <circle cx="19" cy="8" r="3" fill="white" />
+export default function BuddyLogo({
+  width = 40,
+  height = 35,
+  className = "",
+}: BuddyLogoProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>();
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const smoothRef = useRef({ x: 0, y: 0 });
+  const lidRef = useRef({ left: 0, right: 0 });
 
-          {/* Bouche - le "b" en bas (langue qui sort) */}
-          <path
-            d="M8 16 L8 24 M8 18 Q8 14 14 14 Q20 14 20 19 Q20 24 14 24 L8 24"
-            stroke="white"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          />
-        </svg>
+  // Site colors
+  const strokeColor = "#3b82f6"; // primary
+  const pupilColor = "#06b6d4";  // accent
+  const lidColor = "#3b82f6";    // primary
+  const bgColor = "#030712";     // background
 
-        {/* Effet de brillance */}
-        <div
-          className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-xl"
-        />
-      </div>
+  const drawBuddy = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-      {/* Texte "Buddy" */}
-      {showText && (
-        <span className="text-xl font-black tracking-tight">
-          Buddy
-        </span>
-      )}
-    </div>
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const W = canvas.width;
+    const H = canvas.height;
+    const sx = W / 130;
+    const sy = H / 115;
+    const px = (x: number) => x * sx;
+    const py = (y: number) => y * sy;
+
+    ctx.clearRect(0, 0, W, H);
+
+    const maxDX = px(7);
+    const maxDY = py(6);
+    const pdx = smoothRef.current.x * maxDX;
+    const pdy = smoothRef.current.y * maxDY;
+
+    const drawArch = (x1: number, topX: number, w: number, lidFrac: number) => {
+      ctx.save();
+
+      // Arch shape
+      ctx.beginPath();
+      ctx.moveTo(px(x1), py(95));
+      ctx.lineTo(px(x1), py(48));
+      ctx.quadraticCurveTo(px(x1), py(8), px(topX), py(8));
+      ctx.quadraticCurveTo(px(x1 + w), py(8), px(x1 + w), py(48));
+      ctx.lineTo(px(x1 + w), py(95));
+      ctx.closePath();
+      ctx.fillStyle = bgColor;
+      ctx.fill();
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = px(10);
+      ctx.lineJoin = "round";
+      ctx.stroke();
+
+      // Clip interior
+      ctx.beginPath();
+      ctx.moveTo(px(x1 + 5), py(95));
+      ctx.lineTo(px(x1 + 5), py(48));
+      ctx.quadraticCurveTo(px(x1 + 5), py(13), px(topX), py(13));
+      ctx.quadraticCurveTo(px(x1 + w - 5), py(13), px(x1 + w - 5), py(48));
+      ctx.lineTo(px(x1 + w - 5), py(95));
+      ctx.closePath();
+      ctx.clip();
+
+      // Pupil - follows mouse
+      const pux = px(x1 + w / 2 - 9) + pdx;
+      const puy = py(52) + pdy;
+      const puw = px(18);
+      const puh = py(22);
+      const r = px(6);
+      ctx.beginPath();
+      ctx.roundRect(pux, puy, puw, puh, r);
+      ctx.fillStyle = pupilColor;
+      ctx.fill();
+
+      // Eyelid
+      if (lidFrac > 0) {
+        ctx.fillStyle = lidColor;
+        ctx.fillRect(px(x1 + 5), py(13), px(w - 10), py(82) * lidFrac);
+      }
+
+      ctx.restore();
+    };
+
+    drawArch(8, 38, 60, lidRef.current.left);
+    drawArch(62, 92, 60, lidRef.current.right);
+
+    // Bottom bar with gradient
+    const gradient = ctx.createLinearGradient(px(3), 0, px(127), 0);
+    gradient.addColorStop(0, strokeColor);
+    gradient.addColorStop(1, pupilColor);
+    ctx.beginPath();
+    ctx.roundRect(px(3), py(88), px(124), py(12), px(3));
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }, []);
+
+  const animateLid = useCallback(
+    (targetL: number, targetR: number, duration: number, delayR: number, onDone?: () => void) => {
+      const startL = lidRef.current.left;
+      const startR = lidRef.current.right;
+      const t0 = performance.now();
+
+      const step = (t: number) => {
+        const elapsed = t - t0;
+        const progressL = Math.min(elapsed / duration, 1);
+        const easedL = progressL < 0.5 ? 2 * progressL * progressL : -1 + (4 - 2 * progressL) * progressL;
+        lidRef.current.left = startL + (targetL - startL) * easedL;
+
+        const progressR = Math.min(Math.max(elapsed - delayR, 0) / duration, 1);
+        const easedR = progressR < 0.5 ? 2 * progressR * progressR : -1 + (4 - 2 * progressR) * progressR;
+        lidRef.current.right = startR + (targetR - startR) * easedR;
+
+        if (progressL < 1 || progressR < 1) {
+          requestAnimationFrame(step);
+        } else if (onDone) {
+          onDone();
+        }
+      };
+
+      requestAnimationFrame(step);
+    },
+    []
   );
-}
 
-// Version avec le :b en texte rotaté
-export function BuddyLogoText({ size = 40, className = "", showText = true }: BuddyLogoProps) {
+  const blink = useCallback(() => {
+    animateLid(1, 1, 90, 55, () => {
+      setTimeout(() => animateLid(0, 0, 140, 55), 80);
+    });
+  }, [animateLid]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current.x = Math.max(
+        -1,
+        Math.min(1, (e.clientX - window.innerWidth / 2) / (window.innerWidth * 0.5))
+      );
+      mouseRef.current.y = Math.max(
+        -1,
+        Math.min(1, (e.clientY - window.innerHeight / 2) / (window.innerHeight * 0.5))
+      );
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const loop = () => {
+      smoothRef.current.x += (mouseRef.current.x - smoothRef.current.x) * 0.08;
+      smoothRef.current.y += (mouseRef.current.y - smoothRef.current.y) * 0.08;
+      drawBuddy();
+      animationRef.current = requestAnimationFrame(loop);
+    };
+
+    animationRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [drawBuddy]);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const autoBlink = () => {
+      blink();
+      const nextBlink = 3000 + Math.random() * 2500;
+      timeoutId = setTimeout(autoBlink, nextBlink);
+    };
+
+    timeoutId = setTimeout(autoBlink, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [blink]);
+
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <div
-        className="relative rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden"
-        style={{ width: size, height: size }}
-      >
-        {/* :b tourné de 90° pour avoir : en haut et b en bas */}
-        <span
-          className="font-black text-white select-none"
-          style={{
-            fontSize: size * 0.5,
-            transform: "rotate(-90deg)",
-            letterSpacing: "-0.1em",
-          }}
-        >
-          :b
-        </span>
-
-        {/* Effet de brillance */}
-        <div
-          className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-xl"
-        />
-      </div>
-
-      {showText && (
-        <span className="text-xl font-black tracking-tight">
-          Buddy
-        </span>
-      )}
-    </div>
-  );
-}
-
-// Version minimaliste avec juste des formes
-export function BuddyLogoMinimal({ size = 40, className = "", showText = true }: BuddyLogoProps) {
-  return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <div
-        className="relative rounded-xl bg-gradient-to-br from-primary to-accent flex flex-col items-center justify-center gap-1 overflow-hidden"
-        style={{ width: size, height: size, padding: size * 0.15 }}
-      >
-        {/* Yeux */}
-        <div className="flex gap-2">
-          <div
-            className="rounded-full bg-white"
-            style={{ width: size * 0.18, height: size * 0.18 }}
-          />
-          <div
-            className="rounded-full bg-white"
-            style={{ width: size * 0.18, height: size * 0.18 }}
-          />
-        </div>
-
-        {/* Bouche style "b" - sourire avec langue */}
-        <div
-          className="bg-white rounded-full"
-          style={{
-            width: size * 0.5,
-            height: size * 0.25,
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            marginTop: size * 0.05,
-          }}
-        />
-
-        {/* Effet de brillance */}
-        <div
-          className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-xl"
-        />
-      </div>
-
-      {showText && (
-        <span className="text-xl font-black tracking-tight">
-          Buddy
-        </span>
-      )}
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      className={className}
+      style={{ display: "block" }}
+    />
   );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import BuddyLogo from "./BuddyLogo";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -39,18 +40,12 @@ export default function NavbarPro() {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Logo :b style */}
+            {/* Animated Buddy Logo */}
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition" />
-                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex flex-col items-center justify-center overflow-hidden">
-                  {/* Yeux : */}
-                  <div className="flex gap-1.5 mb-0.5">
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  </div>
-                  {/* Bouche b */}
-                  <span className="text-white font-black text-lg leading-none -mt-0.5">b</span>
+                <div className="relative">
+                  <BuddyLogo width={40} height={35} />
                 </div>
               </div>
               <span className="text-2xl font-black bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300">
