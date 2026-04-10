@@ -14,7 +14,7 @@ export default function BuddyLogo({
   className = "",
 }: BuddyLogoProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | null>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const smoothRef = useRef({ x: 0, y: 0 });
   const lidRef = useRef({ left: 0, right: 0 });
