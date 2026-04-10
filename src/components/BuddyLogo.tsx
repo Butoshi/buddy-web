@@ -19,11 +19,11 @@ export default function BuddyLogo({
   const smoothRef = useRef({ x: 0, y: 0 });
   const lidRef = useRef({ left: 0, right: 0 });
 
-  // Site colors
-  const strokeColor = "#3b82f6"; // primary
-  const pupilColor = "#06b6d4";  // accent
-  const lidColor = "#3b82f6";    // primary
-  const bgColor = "#030712";     // background
+  // Colors - natural look
+  const strokeColor = "#1e3a8a"; // dark blue outline
+  const pupilColor = "#06b6d4";  // cyan pupils
+  const lidColor = "#1e3a8a";    // dark blue eyelids
+  const bgColor = "#ffffff";     // white eye background
 
   const drawBuddy = useCallback(() => {
     const canvas = canvasRef.current;
