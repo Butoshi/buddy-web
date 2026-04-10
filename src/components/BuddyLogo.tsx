@@ -59,10 +59,15 @@ export default function BuddyLogo({
     const pdx = smoothRef.current.x * maxDX;
     const pdy = smoothRef.current.y * maxDY;
 
-    // Pupil size (horizontal) - wider to fill the holes
-    const pupilW = W * 0.18;
-    const pupilH = H * 0.22;
-    const pupilR = Math.min(pupilW, pupilH) * 0.4;
+    // Left pupil size (smaller hole of B)
+    const leftPupilW = W * 0.18;
+    const leftPupilH = H * 0.22;
+    const leftPupilR = Math.min(leftPupilW, leftPupilH) * 0.4;
+
+    // Right pupil size (bigger hole of B) - slightly larger
+    const rightPupilW = W * 0.20;
+    const rightPupilH = H * 0.24;
+    const rightPupilR = Math.min(rightPupilW, rightPupilH) * 0.4;
 
     // Left eye position (smaller hole of B)
     const leftEyeX = W * 0.30 + pdx;
@@ -78,31 +83,31 @@ export default function BuddyLogo({
     // Left pupil
     if (lidRef.current.left < 0.9) {
       ctx.beginPath();
-      ctx.roundRect(leftEyeX - pupilW/2, leftEyeY - pupilH/2, pupilW, pupilH, pupilR);
+      ctx.roundRect(leftEyeX - leftPupilW/2, leftEyeY - leftPupilH/2, leftPupilW, leftPupilH, leftPupilR);
       ctx.fill();
     }
 
     // Right pupil
     if (lidRef.current.right < 0.9) {
       ctx.beginPath();
-      ctx.roundRect(rightEyeX - pupilW/2, rightEyeY - pupilH/2, pupilW, pupilH, pupilR);
+      ctx.roundRect(rightEyeX - rightPupilW/2, rightEyeY - rightPupilH/2, rightPupilW, rightPupilH, rightPupilR);
       ctx.fill();
     }
 
     // Eyelids (for blink - covers the pupils with white)
     if (lidRef.current.left > 0) {
       ctx.fillStyle = lidColor;
-      const lidH = pupilH * 1.5 * lidRef.current.left;
+      const lidH = leftPupilH * 1.5 * lidRef.current.left;
       ctx.beginPath();
-      ctx.roundRect(leftEyeX - pupilW/2 - 2, leftEyeY - pupilH/2 - 2, pupilW + 4, lidH, pupilR);
+      ctx.roundRect(leftEyeX - leftPupilW/2 - 2, leftEyeY - leftPupilH/2 - 2, leftPupilW + 4, lidH, leftPupilR);
       ctx.fill();
     }
 
     if (lidRef.current.right > 0) {
       ctx.fillStyle = lidColor;
-      const lidH = pupilH * 1.5 * lidRef.current.right;
+      const lidH = rightPupilH * 1.5 * lidRef.current.right;
       ctx.beginPath();
-      ctx.roundRect(rightEyeX - pupilW/2 - 2, rightEyeY - pupilH/2 - 2, pupilW + 4, lidH, pupilR);
+      ctx.roundRect(rightEyeX - rightPupilW/2 - 2, rightEyeY - rightPupilH/2 - 2, rightPupilW + 4, lidH, rightPupilR);
       ctx.fill();
     }
   }, []);
