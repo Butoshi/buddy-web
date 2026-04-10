@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
+import BuddyLogo from "@/components/BuddyLogo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -43,7 +44,7 @@ export default function LoginPage() {
         <div className="relative z-10 max-w-md">
           <Link href="/" className="flex items-center gap-3 mb-12">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <span className="text-2xl font-black text-white">B</span>
+              <BuddyLogo width={38} height={34} />
             </div>
             <span className="text-3xl font-black">Buddy</span>
           </Link>
@@ -88,8 +89,8 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <span className="text-xl font-black text-white">B</span>
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <BuddyLogo width={34} height={30} />
               </div>
               <span className="text-2xl font-black">Buddy</span>
             </Link>

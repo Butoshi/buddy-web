@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import FooterPro from "@/components/FooterPro";
+import BuddyLogo from "@/components/BuddyLogo";
 
 // Real Buddy decision hierarchy
 const decisionHierarchy = [
@@ -185,12 +186,8 @@ export default function FeaturesPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex flex-col items-center justify-center overflow-hidden">
-              <div className="flex gap-1.5 mb-0.5">
-                <div className="w-2 h-2 rounded-full bg-white" />
-                <div className="w-2 h-2 rounded-full bg-white" />
-              </div>
-              <span className="text-white font-black text-lg leading-none -mt-0.5">b</span>
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
+              <BuddyLogo width={34} height={30} />
             </div>
             <span className="text-xl font-black">Buddy</span>
           </Link>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/context/AuthContext";
+import BuddyLogo from "@/components/BuddyLogo";
 
 const WALLET_ADDRESS = process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS || "8UJLeuDZpQSDdJTQry2JrRN3B1hSjrmp7p1K1N7zHyDD";
 const PRICE_SOL = 6;
@@ -78,7 +79,7 @@ export default function BuyPage() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 mb-12 justify-center">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <span className="text-2xl font-black text-white">B</span>
+            <BuddyLogo width={38} height={34} />
           </div>
           <span className="text-3xl font-black">Buddy</span>
         </Link>

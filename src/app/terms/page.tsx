@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import BuddyLogo from "@/components/BuddyLogo";
 
 export default function TermsPage() {
   return (
@@ -7,8 +10,8 @@ export default function TermsPage() {
       <header className="border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <span className="text-xl font-black text-white">B</span>
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <BuddyLogo width={34} height={30} />
             </div>
             <span className="text-xl font-black">Buddy</span>
           </Link>

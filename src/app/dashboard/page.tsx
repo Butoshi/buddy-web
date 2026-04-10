@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import BuddyLogo from "@/components/BuddyLogo";
 
 // Agent API URL
 const AGENT_API_URL = "http://localhost:3001/api/data";
@@ -226,8 +227,8 @@ export default function DashboardPage() {
             {/* Logo + Mobile menu */}
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <span className="text-xl font-black text-white">B</span>
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <BuddyLogo width={34} height={30} />
                 </div>
                 <span className="text-xl font-black hidden sm:block">Buddy</span>
               </Link>

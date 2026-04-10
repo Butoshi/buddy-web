@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import BuddyLogo from "@/components/BuddyLogo";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -72,8 +73,8 @@ export default function ResetPasswordPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <span className="text-xl font-black text-white">B</span>
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <BuddyLogo width={34} height={30} />
             </div>
             <span className="text-2xl font-black">Buddy</span>
           </Link>

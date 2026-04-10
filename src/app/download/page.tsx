@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import BuddyLogo from "@/components/BuddyLogo";
 
 const platforms = [
   {
@@ -349,8 +350,8 @@ export default function DownloadPage() {
       <header className="border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <span className="text-xl font-black text-white">B</span>
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <BuddyLogo width={34} height={30} />
             </div>
             <span className="text-xl font-black">Buddy</span>
           </Link>
