@@ -15,6 +15,23 @@ interface LicenseData {
   wallet_address: string;
 }
 
+interface ReferralData {
+  id: string;
+  referral_code: string;
+  wallet_address: string | null;
+  total_earnings: number;
+  paid_earnings: number;
+  total_sales: number;
+}
+
+interface ReferralSale {
+  id: string;
+  buyer_email: string;
+  commission_amount: number;
+  status: string;
+  created_at: string;
+}
+
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
@@ -22,6 +39,14 @@ export default function ProfilePage() {
   const [loadingLicense, setLoadingLicense] = useState(true);
   const [copiedLicense, setCopiedLicense] = useState(false);
   const [copiedTelegram, setCopiedTelegram] = useState(false);
+
+  // Referral state
+  const [referralData, setReferralData] = useState<ReferralData | null>(null);
+  const [referralSales, setReferralSales] = useState<ReferralSale[]>([]);
+  const [loadingReferral, setLoadingReferral] = useState(true);
+  const [copiedReferral, setCopiedReferral] = useState(false);
+  const [walletInput, setWalletInput] = useState("");
+  const [savingWallet, setSavingWallet] = useState(false);
 
   // Private Telegram group link (only for buyers)
   const TELEGRAM_GROUP = "https://t.me/+XXXXXXXXXX"; // Replace with actual link
@@ -57,6 +82,104 @@ export default function ProfilePage() {
       fetchLicense();
     }
   }, [user]);
+
+  // Fetch or create referral data
+  useEffect(() => {
+    async function fetchReferral() {
+      if (!user) return;
+
+      try {
+        // Try to get existing referral
+        let { data, error } = await supabase
+          .from("referrals")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        // If no referral exists, create one
+        if (error && error.code === "PGRST116") {
+          const newCode = generateReferralCode();
+          const { data: newReferral, error: createError } = await supabase
+            .from("referrals")
+            .insert({
+              user_id: user.id,
+              referral_code: newCode,
+            })
+            .select()
+            .single();
+
+          if (!createError && newReferral) {
+            data = newReferral;
+          }
+        }
+
+        if (data) {
+          setReferralData(data);
+          setWalletInput(data.wallet_address || "");
+
+          // Fetch referral sales
+          const { data: sales } = await supabase
+            .from("referral_sales")
+            .select("*")
+            .eq("referrer_id", data.id)
+            .order("created_at", { ascending: false });
+
+          if (sales) {
+            setReferralSales(sales);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching referral:", err);
+      } finally {
+        setLoadingReferral(false);
+      }
+    }
+
+    if (user) {
+      fetchReferral();
+    }
+  }, [user]);
+
+  // Generate a random referral code
+  function generateReferralCode(): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "";
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  // Save wallet address
+  async function saveWalletAddress() {
+    if (!referralData || !walletInput.trim()) return;
+
+    setSavingWallet(true);
+    try {
+      const { error } = await supabase
+        .from("referrals")
+        .update({ wallet_address: walletInput.trim() })
+        .eq("id", referralData.id);
+
+      if (!error) {
+        setReferralData({ ...referralData, wallet_address: walletInput.trim() });
+      }
+    } catch (err) {
+      console.error("Error saving wallet:", err);
+    } finally {
+      setSavingWallet(false);
+    }
+  }
+
+  // Copy referral link
+  const copyReferralLink = () => {
+    if (referralData?.referral_code) {
+      const link = `${window.location.origin}/buy?ref=${referralData.referral_code}`;
+      navigator.clipboard.writeText(link);
+      setCopiedReferral(true);
+      setTimeout(() => setCopiedReferral(false), 2000);
+    }
+  };
 
   const copyLicense = () => {
     if (licenseData?.code) {
@@ -284,6 +407,115 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
+
+          {/* Referral Program Section */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+            <h2 className="font-bold mb-4 flex items-center gap-2 text-purple-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+              Referral Program - Earn 1 SOL per sale!
+            </h2>
+
+            {loadingReferral ? (
+              <div className="flex justify-center py-4">
+                <svg className="w-6 h-6 animate-spin text-purple-400" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              </div>
+            ) : referralData ? (
+              <div className="space-y-4">
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-white/5 rounded-xl p-3 text-center">
+                    <div className="text-2xl font-black text-purple-400">{referralData.total_sales}</div>
+                    <div className="text-xs text-muted">Sales</div>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-3 text-center">
+                    <div className="text-2xl font-black text-green-400">{referralData.total_earnings} SOL</div>
+                    <div className="text-xs text-muted">Earned</div>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-3 text-center">
+                    <div className="text-2xl font-black text-yellow-400">{(referralData.total_earnings - referralData.paid_earnings).toFixed(2)} SOL</div>
+                    <div className="text-xs text-muted">Pending</div>
+                  </div>
+                </div>
+
+                {/* Referral Link */}
+                <div>
+                  <label className="block text-sm text-muted mb-2">Your Referral Link</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/buy?ref=${referralData.referral_code}`}
+                      readOnly
+                      className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-mono"
+                    />
+                    <button
+                      onClick={copyReferralLink}
+                      className="px-4 py-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 transition-colors text-purple-400"
+                    >
+                      {copiedReferral ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Wallet Address Input */}
+                <div>
+                  <label className="block text-sm text-muted mb-2">
+                    Your SOL Wallet (for receiving commissions)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={walletInput}
+                      onChange={(e) => setWalletInput(e.target.value)}
+                      placeholder="Paste your Solana wallet address..."
+                      className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-mono focus:border-purple-500/50 focus:outline-none"
+                    />
+                    <button
+                      onClick={saveWalletAddress}
+                      disabled={savingWallet || walletInput === referralData.wallet_address}
+                      className="px-4 py-3 rounded-xl bg-purple-500 hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-white font-semibold"
+                    >
+                      {savingWallet ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                  {referralData.wallet_address && (
+                    <p className="text-xs text-green-400 mt-1">Wallet saved - You will receive commissions here</p>
+                  )}
+                  {!referralData.wallet_address && (
+                    <p className="text-xs text-yellow-400 mt-1">Add your wallet to receive commission payments</p>
+                  )}
+                </div>
+
+                {/* Recent Sales */}
+                {referralSales.length > 0 && (
+                  <div>
+                    <label className="block text-sm text-muted mb-2">Recent Referral Sales</label>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {referralSales.slice(0, 5).map((sale) => (
+                        <div key={sale.id} className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 text-sm">
+                          <span className="text-muted">{new Date(sale.created_at).toLocaleDateString()}</span>
+                          <span className={`font-semibold ${sale.status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
+                            +{sale.commission_amount} SOL ({sale.status})
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* How it works */}
+                <div className="bg-white/5 rounded-xl p-4 text-sm text-muted">
+                  <strong className="text-white">How it works:</strong> Share your referral link. When someone purchases Buddy using your link, you earn 1 SOL commission. Payments are sent weekly to your wallet.
+                </div>
+              </div>
+            ) : (
+              <p className="text-muted">Unable to load referral data</p>
+            )}
+          </div>
 
           {/* Help Section */}
           <div className="p-6 rounded-2xl bg-card/50 border border-white/10 text-center">

@@ -11,7 +11,7 @@ const LAMPORTS_PER_SOL = 1_000_000_000;
 
 export async function POST(request: NextRequest) {
   try {
-    const { signature, userId } = await request.json();
+    const { signature, userId, referralCode } = await request.json();
 
     if (!signature) {
       return NextResponse.json({ error: 'Transaction signature required' }, { status: 400 });
@@ -127,7 +127,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to assign license' }, { status: 500 });
     }
 
-    // 7. Return success with license code
+    // 7. Handle referral commission if referral code exists
+    if (referralCode) {
+      try {
+        // Find the referrer by code
+        const { data: referrer } = await supabase
+          .from('referrals')
+          .select('id, total_earnings, total_sales')
+          .eq('referral_code', referralCode)
+          .single();
+
+        if (referrer) {
+          // Create referral sale record
+          await supabase
+            .from('referral_sales')
+            .insert({
+              referrer_id: referrer.id,
+              buyer_email: userId ? 'user-' + userId.slice(0, 8) : 'anonymous',
+              transaction_signature: signature,
+              commission_amount: 1, // 1 SOL commission
+              status: 'pending'
+            });
+
+          // Update referrer stats (increment manually)
+          await supabase
+            .from('referrals')
+            .update({
+              total_earnings: (referrer.total_earnings || 0) + 1,
+              total_sales: (referrer.total_sales || 0) + 1
+            })
+            .eq('id', referrer.id);
+        }
+      } catch (refError) {
+        // Log but don't fail the purchase if referral tracking fails
+        console.error('Referral tracking error:', refError);
+      }
+    }
+
+    // 8. Return success with license code
     return NextResponse.json({
       success: true,
       code: availableCode.code,

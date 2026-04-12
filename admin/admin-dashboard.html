@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buddy Admin - Referral Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { background: #0a0a0a; }
+    .gradient-border {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      padding: 1px;
+      border-radius: 1rem;
+    }
+    .gradient-border > div {
+      background: #1a1a1a;
+      border-radius: calc(1rem - 1px);
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen p-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Buddy Admin Dashboard
+        </h1>
+        <p class="text-gray-400 mt-1">Manage referral commissions</p>
+      </div>
+      <div id="connection-status" class="px-4 py-2 rounded-full bg-yellow-500/20 text-yellow-400 text-sm">
+        Connecting...
+      </div>
+    </div>
+
+    <!-- Config Section -->
+    <div class="gradient-border mb-6">
+      <div class="p-6">
+        <h2 class="font-bold mb-4 text-purple-400">Supabase Configuration</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">Supabase URL</label>
+            <input type="text" id="supabase-url" placeholder="https://xxx.supabase.co"
+              class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">Supabase Anon Key</label>
+            <input type="password" id="supabase-key" placeholder="eyJhbGciOiJIUzI1NiIs..."
+              class="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 focus:border-purple-500 focus:outline-none">
+          </div>
+        </div>
+        <button onclick="connect()" class="mt-4 px-6 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg font-semibold transition">
+          Connect
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+        <div class="text-3xl font-black text-purple-400" id="stat-referrers">-</div>
+        <div class="text-sm text-gray-400">Active Referrers</div>
+      </div>
+      <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+        <div class="text-3xl font-black text-green-400" id="stat-sales">-</div>
+        <div class="text-sm text-gray-400">Total Sales</div>
+      </div>
+      <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+        <div class="text-3xl font-black text-yellow-400" id="stat-pending">-</div>
+        <div class="text-sm text-gray-400">Pending (SOL)</div>
+      </div>
+      <div class="bg-white/5 rounded-xl p-4 border border-white/10">
+        <div class="text-3xl font-black text-blue-400" id="stat-paid">-</div>
+        <div class="text-sm text-gray-400">Paid (SOL)</div>
+      </div>
+    </div>
+
+    <!-- Pending Payments Table -->
+    <div class="gradient-border mb-6">
+      <div class="p-6">
+        <h2 class="font-bold mb-4 text-yellow-400">Pending Payments</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="text-left text-gray-400 text-sm border-b border-white/10">
+                <th class="pb-3">Referrer</th>
+                <th class="pb-3">Wallet</th>
+                <th class="pb-3">Pending</th>
+                <th class="pb-3">Total Sales</th>
+                <th class="pb-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pending-table">
+              <tr>
+                <td colspan="5" class="py-8 text-center text-gray-500">Connect to Supabase to load data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Sales -->
+    <div class="gradient-border">
+      <div class="p-6">
+        <h2 class="font-bold mb-4 text-green-400">Recent Referral Sales</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="text-left text-gray-400 text-sm border-b border-white/10">
+                <th class="pb-3">Date</th>
+                <th class="pb-3">Referrer Code</th>
+                <th class="pb-3">Amount</th>
+                <th class="pb-3">Status</th>
+                <th class="pb-3">Transaction</th>
+              </tr>
+            </thead>
+            <tbody id="sales-table">
+              <tr>
+                <td colspan="5" class="py-8 text-center text-gray-500">Connect to Supabase to load data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="payment-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50">
+    <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4 border border-purple-500/20">
+      <h3 class="text-xl font-bold mb-4">Pay Commission</h3>
+      <div id="modal-content"></div>
+      <div class="flex gap-4 mt-6">
+        <button onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition">
+          Cancel
+        </button>
+        <button onclick="markAsPaid()" class="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 font-semibold transition">
+          Mark as Paid
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let supabase = null;
+    let currentReferrer = null;
+
+    // Load saved config
+    document.getElementById('supabase-url').value = localStorage.getItem('buddy_admin_url') || '';
+    document.getElementById('supabase-key').value = localStorage.getItem('buddy_admin_key') || '';
+
+    // Auto-connect if config exists
+    if (localStorage.getItem('buddy_admin_url') && localStorage.getItem('buddy_admin_key')) {
+      connect();
+    }
+
+    async function connect() {
+      const url = document.getElementById('supabase-url').value.trim();
+      const key = document.getElementById('supabase-key').value.trim();
+
+      if (!url || !key) {
+        alert('Please enter Supabase URL and Key');
+        return;
+      }
+
+      // Save config
+      localStorage.setItem('buddy_admin_url', url);
+      localStorage.setItem('buddy_admin_key', key);
+
+      try {
+        supabase = window.supabase.createClient(url, key);
+
+        // Test connection
+        const { data, error } = await supabase.from('referrals').select('count').limit(1);
+
+        if (error) throw error;
+
+        document.getElementById('connection-status').className = 'px-4 py-2 rounded-full bg-green-500/20 text-green-400 text-sm';
+        document.getElementById('connection-status').textContent = 'Connected';
+
+        loadData();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('connection-status').className = 'px-4 py-2 rounded-full bg-red-500/20 text-red-400 text-sm';
+        document.getElementById('connection-status').textContent = 'Connection Failed';
+      }
+    }
+
+    async function loadData() {
+      if (!supabase) return;
+
+      // Load referrers with pending payments
+      const { data: referrers } = await supabase
+        .from('referrals')
+        .select('*, referral_sales(*)')
+        .order('total_sales', { ascending: false });
+
+      // Calculate stats
+      let totalReferrers = 0;
+      let totalSales = 0;
+      let totalPending = 0;
+      let totalPaid = 0;
+
+      const pendingPayments = [];
+
+      referrers?.forEach(r => {
+        if (r.total_sales > 0) totalReferrers++;
+        totalSales += r.total_sales || 0;
+
+        const pending = (r.total_earnings || 0) - (r.paid_earnings || 0);
+        totalPending += pending;
+        totalPaid += r.paid_earnings || 0;
+
+        if (pending > 0) {
+          pendingPayments.push({
+            ...r,
+            pendingAmount: pending
+          });
+        }
+      });
+
+      // Update stats
+      document.getElementById('stat-referrers').textContent = totalReferrers;
+      document.getElementById('stat-sales').textContent = totalSales;
+      document.getElementById('stat-pending').textContent = totalPending.toFixed(2);
+      document.getElementById('stat-paid').textContent = totalPaid.toFixed(2);
+
+      // Update pending table
+      const pendingTable = document.getElementById('pending-table');
+      if (pendingPayments.length === 0) {
+        pendingTable.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-500">No pending payments</td></tr>';
+      } else {
+        pendingTable.innerHTML = pendingPayments.map(r => `
+          <tr class="border-b border-white/5">
+            <td class="py-3">
+              <span class="font-mono text-purple-400">${r.referral_code}</span>
+            </td>
+            <td class="py-3">
+              ${r.wallet_address
+                ? `<span class="font-mono text-sm">${r.wallet_address.slice(0, 6)}...${r.wallet_address.slice(-4)}</span>
+                   <button onclick="copyWallet('${r.wallet_address}')" class="ml-2 text-xs text-gray-400 hover:text-white">Copy</button>`
+                : '<span class="text-red-400 text-sm">No wallet set</span>'}
+            </td>
+            <td class="py-3">
+              <span class="text-yellow-400 font-bold">${r.pendingAmount.toFixed(2)} SOL</span>
+            </td>
+            <td class="py-3">${r.total_sales}</td>
+            <td class="py-3">
+              ${r.wallet_address
+                ? `<button onclick="openPayModal('${r.id}', '${r.referral_code}', '${r.wallet_address}', ${r.pendingAmount})"
+                     class="px-4 py-1 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 text-sm font-semibold transition">
+                     Pay
+                   </button>`
+                : '<span class="text-gray-500 text-sm">Wallet required</span>'}
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Load recent sales
+      const { data: sales } = await supabase
+        .from('referral_sales')
+        .select('*, referrals(referral_code)')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const salesTable = document.getElementById('sales-table');
+      if (!sales || sales.length === 0) {
+        salesTable.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-500">No sales yet</td></tr>';
+      } else {
+        salesTable.innerHTML = sales.map(s => `
+          <tr class="border-b border-white/5">
+            <td class="py-3 text-sm">${new Date(s.created_at).toLocaleString()}</td>
+            <td class="py-3 font-mono text-purple-400">${s.referrals?.referral_code || '-'}</td>
+            <td class="py-3 font-bold">${s.commission_amount} SOL</td>
+            <td class="py-3">
+              <span class="px-2 py-1 rounded-full text-xs ${s.status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">
+                ${s.status}
+              </span>
+            </td>
+            <td class="py-3">
+              <a href="https://solscan.io/tx/${s.transaction_signature}" target="_blank"
+                 class="text-blue-400 hover:text-blue-300 text-sm font-mono">
+                ${s.transaction_signature.slice(0, 8)}...
+              </a>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function copyWallet(wallet) {
+      navigator.clipboard.writeText(wallet);
+      alert('Wallet copied!');
+    }
+
+    function openPayModal(id, code, wallet, amount) {
+      currentReferrer = { id, code, wallet, amount };
+
+      document.getElementById('modal-content').innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <div class="text-sm text-gray-400">Referrer</div>
+            <div class="font-mono text-purple-400">${code}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-400">Amount to Pay</div>
+            <div class="text-2xl font-bold text-yellow-400">${amount.toFixed(2)} SOL</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-400">Send to Wallet</div>
+            <div class="font-mono text-sm break-all bg-white/5 p-2 rounded">${wallet}</div>
+            <button onclick="copyWallet('${wallet}')" class="mt-2 text-sm text-purple-400 hover:text-purple-300">
+              Copy Wallet Address
+            </button>
+          </div>
+          <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 text-sm text-yellow-400">
+            <strong>Instructions:</strong><br>
+            1. Open your Solana wallet (Phantom, etc.)<br>
+            2. Send ${amount.toFixed(2)} SOL to the wallet above<br>
+            3. Click "Mark as Paid" after sending
+          </div>
+        </div>
+      `;
+
+      document.getElementById('payment-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('payment-modal').classList.add('hidden');
+      currentReferrer = null;
+    }
+
+    async function markAsPaid() {
+      if (!currentReferrer || !supabase) return;
+
+      try {
+        // Update referral paid_earnings
+        const { data: referrer } = await supabase
+          .from('referrals')
+          .select('paid_earnings')
+          .eq('id', currentReferrer.id)
+          .single();
+
+        await supabase
+          .from('referrals')
+          .update({
+            paid_earnings: (referrer.paid_earnings || 0) + currentReferrer.amount
+          })
+          .eq('id', currentReferrer.id);
+
+        // Update all pending sales for this referrer to paid
+        await supabase
+          .from('referral_sales')
+          .update({
+            status: 'paid',
+            paid_at: new Date().toISOString()
+          })
+          .eq('referrer_id', currentReferrer.id)
+          .eq('status', 'pending');
+
+        closeModal();
+        loadData();
+        alert('Payment marked as complete!');
+      } catch (err) {
+        console.error(err);
+        alert('Error updating payment status');
+      }
+    }
+
+    // Refresh data every 30 seconds
+    setInterval(() => {
+      if (supabase) loadData();
+    }, 30000);
+  </script>
+</body>
+</html>

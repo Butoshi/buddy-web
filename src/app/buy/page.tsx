@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/context/AuthContext";
@@ -18,8 +19,25 @@ export default function BuyPage() {
   const [licenseCode, setLicenseCode] = useState("");
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
 
   const { user, loading } = useAuth();
+  const searchParams = useSearchParams();
+
+  // Capture referral code from URL and store in localStorage
+  useEffect(() => {
+    const refCode = searchParams.get("ref");
+    if (refCode) {
+      localStorage.setItem("buddy_referral", refCode);
+      setReferralCode(refCode);
+    } else {
+      // Check if we have a stored referral code
+      const storedRef = localStorage.getItem("buddy_referral");
+      if (storedRef) {
+        setReferralCode(storedRef);
+      }
+    }
+  }, [searchParams]);
 
   const copyAddress = () => {
     navigator.clipboard.writeText(WALLET_ADDRESS);
@@ -43,14 +61,23 @@ export default function BuyPage() {
     setError("");
 
     try {
+      // Get referral code from state or localStorage
+      const refCode = referralCode || localStorage.getItem("buddy_referral");
+
       const response = await fetch("/api/verify-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           signature: signature.trim(),
           userId: user?.id || null,
+          referralCode: refCode,
         }),
       });
+
+      // Clear referral code after successful purchase
+      if (response.ok) {
+        localStorage.removeItem("buddy_referral");
+      }
 
       const data = await response.json();
 
