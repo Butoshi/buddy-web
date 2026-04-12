@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -10,6 +10,26 @@ import BuddyLogo from "@/components/BuddyLogo";
 
 const WALLET_ADDRESS = process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS || "8UJLeuDZpQSDdJTQry2JrRN3B1hSjrmp7p1K1N7zHyDD";
 const PRICE_SOL = 6;
+
+// Component to capture referral code from URL
+function ReferralCapture({ onCapture }: { onCapture: (code: string | null) => void }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const refCode = searchParams.get("ref");
+    if (refCode) {
+      localStorage.setItem("buddy_referral", refCode);
+      onCapture(refCode);
+    } else {
+      const storedRef = localStorage.getItem("buddy_referral");
+      if (storedRef) {
+        onCapture(storedRef);
+      }
+    }
+  }, [searchParams, onCapture]);
+
+  return null;
+}
 
 export default function BuyPage() {
   const [step, setStep] = useState<"pay" | "verify" | "success">("pay");
@@ -22,22 +42,6 @@ export default function BuyPage() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
 
   const { user, loading } = useAuth();
-  const searchParams = useSearchParams();
-
-  // Capture referral code from URL and store in localStorage
-  useEffect(() => {
-    const refCode = searchParams.get("ref");
-    if (refCode) {
-      localStorage.setItem("buddy_referral", refCode);
-      setReferralCode(refCode);
-    } else {
-      // Check if we have a stored referral code
-      const storedRef = localStorage.getItem("buddy_referral");
-      if (storedRef) {
-        setReferralCode(storedRef);
-      }
-    }
-  }, [searchParams]);
 
   const copyAddress = () => {
     navigator.clipboard.writeText(WALLET_ADDRESS);
@@ -96,6 +100,11 @@ export default function BuyPage() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Capture referral code from URL */}
+      <Suspense fallback={null}>
+        <ReferralCapture onCapture={setReferralCode} />
+      </Suspense>
+
       {/* Background */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[200px]" />
