@@ -203,9 +203,9 @@ export default function ReferralPage() {
 
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { referrals: 5, sol: 5, usd: "~$750" },
-              { referrals: 20, sol: 20, usd: "~$3,000" },
-              { referrals: 100, sol: 100, usd: "~$15,000" },
+              { referrals: 5, sol: 5, usd: "~$400" },
+              { referrals: 20, sol: 20, usd: "~$1,600" },
+              { referrals: 100, sol: 100, usd: "~$8,000" },
             ].map((tier) => (
               <div
                 key={tier.referrals}
