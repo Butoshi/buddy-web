@@ -32,14 +32,15 @@ function ReferralCapture({ onCapture }: { onCapture: (code: string | null) => vo
 }
 
 export default function BuyPage() {
-  const [step, setStep] = useState<"pay" | "verify" | "success">("pay");
-  const [signature, setSignature] = useState("");
+  const [step, setStep] = useState<"wallet" | "pay" | "verify" | "success">("wallet");
+  const [buyerWallet, setBuyerWallet] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState("");
   const [licenseCode, setLicenseCode] = useState("");
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [verifyAttempts, setVerifyAttempts] = useState(0);
 
   const { user, loading } = useAuth();
 
@@ -55,14 +56,30 @@ export default function BuyPage() {
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
+  const validateWallet = () => {
+    const wallet = buyerWallet.trim();
+    if (!wallet) {
+      setError("Please enter your wallet address");
+      return;
+    }
+    // Basic Solana wallet validation (32-44 characters, base58)
+    if (wallet.length < 32 || wallet.length > 44) {
+      setError("Invalid Solana wallet address");
+      return;
+    }
+    setError("");
+    setStep("pay");
+  };
+
   const verifyPayment = async () => {
-    if (!signature.trim()) {
-      setError("Please enter your transaction signature");
+    if (!buyerWallet.trim()) {
+      setError("Wallet address missing");
       return;
     }
 
     setIsVerifying(true);
     setError("");
+    setVerifyAttempts(prev => prev + 1);
 
     try {
       // Get referral code from state or localStorage
@@ -72,7 +89,7 @@ export default function BuyPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          signature: signature.trim(),
+          buyerWallet: buyerWallet.trim(),
           userId: user?.id || null,
           referralCode: refCode,
         }),
@@ -89,7 +106,7 @@ export default function BuyPage() {
         setLicenseCode(data.code);
         setStep("success");
       } else {
-        setError(data.error || "Payment verification failed");
+        setError(data.error || "Payment not found. Make sure you sent the payment and try again.");
       }
     } catch (err) {
       setError("Network error. Please try again.");
@@ -166,18 +183,21 @@ export default function BuyPage() {
         {/* Progress Steps - Only show if logged in */}
         {!loading && user && (
         <>
-        <div className="flex items-center justify-center gap-4 mb-12">
-          {["Pay", "Verify", "Download"].map((label, i) => (
+        <div className="flex items-center justify-center gap-2 mb-12">
+          {["Wallet", "Pay", "Verify", "Done"].map((label, i) => (
             <div key={label} className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                (step === "pay" && i === 0) || (step === "verify" && i <= 1) || (step === "success" && i <= 2)
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                (step === "wallet" && i === 0) ||
+                (step === "pay" && i <= 1) ||
+                (step === "verify" && i <= 2) ||
+                (step === "success" && i <= 3)
                   ? "bg-gradient-to-r from-primary to-accent text-white"
                   : "bg-white/10 text-muted"
               }`}>
                 {i + 1}
               </div>
-              <span className="ml-2 text-sm hidden sm:inline">{label}</span>
-              {i < 2 && <div className="w-8 sm:w-16 h-0.5 bg-white/10 mx-2" />}
+              <span className="ml-1 text-xs sm:text-sm hidden sm:inline">{label}</span>
+              {i < 3 && <div className="w-4 sm:w-8 h-0.5 bg-white/10 mx-1 sm:mx-2" />}
             </div>
           ))}
         </div>
@@ -187,11 +207,11 @@ export default function BuyPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-card/50 backdrop-blur-xl rounded-3xl border border-white/10 p-8"
         >
-          {/* Step 1: Pay */}
-          {step === "pay" && (
+          {/* Step 1: Enter Wallet */}
+          {step === "wallet" && (
             <>
               <h1 className="text-3xl font-black text-center mb-2">Buy Buddy AI Agent</h1>
-              <p className="text-muted text-center mb-8">Send SOL to complete your purchase</p>
+              <p className="text-muted text-center mb-8">Enter your Solana wallet address to get started</p>
 
               <div className="bg-white/5 rounded-2xl p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
@@ -199,6 +219,48 @@ export default function BuyPage() {
                   <span className="text-3xl font-black text-primary">{PRICE_SOL} SOL</span>
                 </div>
                 <div className="text-sm text-muted">One-time payment • Lifetime access • All updates included</div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">Your Solana Wallet Address</label>
+                <input
+                  type="text"
+                  value={buyerWallet}
+                  onChange={(e) => setBuyerWallet(e.target.value)}
+                  placeholder="Enter your wallet address (e.g., 7xK2...)"
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 font-mono text-sm"
+                />
+                <p className="text-xs text-muted mt-2">
+                  This is the wallet you will use to send the payment
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+
+              <button
+                onClick={validateWallet}
+                className="w-full py-4 rounded-xl btn-glow text-white font-semibold"
+              >
+                Continue
+              </button>
+            </>
+          )}
+
+          {/* Step 2: Pay */}
+          {step === "pay" && (
+            <>
+              <h1 className="text-3xl font-black text-center mb-2">Send Payment</h1>
+              <p className="text-muted text-center mb-8">Send {PRICE_SOL} SOL from your wallet</p>
+
+              {/* Your wallet reminder */}
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 mb-6">
+                <p className="text-purple-400 text-sm">
+                  <strong>Your wallet:</strong> <span className="font-mono">{buyerWallet.slice(0, 6)}...{buyerWallet.slice(-4)}</span>
+                </p>
               </div>
 
               {/* QR Code */}
@@ -233,44 +295,71 @@ export default function BuyPage() {
 
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
                 <p className="text-yellow-400 text-sm">
-                  <strong>Important:</strong> Send exactly {PRICE_SOL} SOL or more. After sending, click the button below and enter your transaction signature.
+                  <strong>Important:</strong> Send exactly {PRICE_SOL} SOL or more from the wallet you entered. After sending, click the button below.
                 </p>
               </div>
 
-              <button
-                onClick={() => setStep("verify")}
-                className="w-full py-4 rounded-xl btn-glow text-white font-semibold"
-              >
-                I&apos;ve Sent the Payment
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setStep("wallet")}
+                  className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors font-semibold"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => setStep("verify")}
+                  className="flex-1 py-4 rounded-xl btn-glow text-white font-semibold"
+                >
+                  I&apos;ve Sent the Payment
+                </button>
+              </div>
             </>
           )}
 
-          {/* Step 2: Verify */}
+          {/* Step 3: Verify */}
           {step === "verify" && (
             <>
               <h1 className="text-3xl font-black text-center mb-2">Verify Payment</h1>
-              <p className="text-muted text-center mb-8">Enter your transaction signature to receive your license</p>
+              <p className="text-muted text-center mb-8">Click below to verify your payment on the blockchain</p>
 
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">Transaction Signature</label>
-                <input
-                  type="text"
-                  value={signature}
-                  onChange={(e) => setSignature(e.target.value)}
-                  placeholder="Paste your transaction signature here..."
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 font-mono text-sm"
-                />
-                <p className="text-xs text-muted mt-2">
-                  Find this in your wallet&apos;s transaction history or on Solscan/Solana Explorer
-                </p>
+              {/* Wallet info */}
+              <div className="bg-white/5 rounded-2xl p-6 mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-muted">Your wallet</span>
+                  <span className="font-mono text-sm">{buyerWallet.slice(0, 6)}...{buyerWallet.slice(-4)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Amount</span>
+                  <span className="font-bold text-primary">{PRICE_SOL} SOL</span>
+                </div>
               </div>
+
+              {isVerifying && (
+                <div className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm flex items-center gap-3">
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Searching for your payment on the blockchain...
+                </div>
+              )}
 
               {error && (
                 <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
                   {error}
+                  {verifyAttempts > 0 && (
+                    <p className="mt-2 text-xs">
+                      Transaction may take a few seconds to confirm. Wait a moment and try again.
+                    </p>
+                  )}
                 </div>
               )}
+
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
+                <p className="text-yellow-400 text-sm">
+                  <strong>Note:</strong> If you just sent the payment, wait 10-30 seconds for it to confirm on the blockchain, then click verify.
+                </p>
+              </div>
 
               <div className="flex gap-4">
                 <button
@@ -284,7 +373,7 @@ export default function BuyPage() {
                   disabled={isVerifying}
                   className="flex-1 py-4 rounded-xl btn-glow text-white font-semibold disabled:opacity-50"
                 >
-                  {isVerifying ? "Verifying..." : "Verify Payment"}
+                  {isVerifying ? "Verifying..." : "Verify My Payment"}
                 </button>
               </div>
             </>
