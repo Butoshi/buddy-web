@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 import BuddyLogo from "@/components/BuddyLogo";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -17,13 +19,54 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
 
   const { signUp } = useAuth();
   const router = useRouter();
 
+  // Check if username is available
+  const checkUsername = async (username: string) => {
+    if (username.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+
+    setCheckingUsername(true);
+    try {
+      const { data } = await supabase
+        .from('referrals')
+        .select('id')
+        .eq('referral_code', username.toLowerCase())
+        .single();
+
+      setUsernameAvailable(!data);
+    } catch {
+      setUsernameAvailable(true);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  // Validate username format
+  const isValidUsername = (username: string) => {
+    return /^[a-zA-Z0-9_]{3,20}$/.test(username);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Validate username
+    if (!isValidUsername(formData.username)) {
+      setError("Username must be 3-20 characters, letters, numbers and underscore only");
+      return;
+    }
+
+    if (!usernameAvailable) {
+      setError("This username is already taken");
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
@@ -37,14 +80,28 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    const { error } = await signUp(formData.email, formData.password);
+    // Sign up with username in metadata
+    const { error, data } = await signUp(formData.email, formData.password);
 
     if (error) {
       setError(error.message || "Failed to create account");
       setIsLoading(false);
-    } else {
-      router.push("/buy");
+      return;
     }
+
+    // Create referral entry with the username
+    if (data?.user) {
+      try {
+        await supabase.from('referrals').insert({
+          user_id: data.user.id,
+          referral_code: formData.username.toLowerCase(),
+        });
+      } catch (refError) {
+        console.error('Failed to create referral:', refError);
+      }
+    }
+
+    router.push("/buy");
   };
 
   const passwordStrength = (password: string) => {
@@ -124,6 +181,67 @@ export default function RegisterPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Username for referral */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Username <span className="text-muted font-normal">(for your referral link)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                      setFormData({ ...formData, username: value });
+                      if (value.length >= 3) {
+                        checkUsername(value);
+                      } else {
+                        setUsernameAvailable(null);
+                      }
+                    }}
+                    placeholder="cryptoking"
+                    maxLength={20}
+                    className={`w-full px-4 py-3 pl-11 pr-11 rounded-xl bg-white/5 border transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                      usernameAvailable === true ? 'border-green-500/50' :
+                      usernameAvailable === false ? 'border-red-500/50' :
+                      'border-white/10 focus:border-primary/50'
+                    }`}
+                    required
+                  />
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  {/* Status indicator */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    {checkingUsername && (
+                      <svg className="w-5 h-5 animate-spin text-muted" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    )}
+                    {!checkingUsername && usernameAvailable === true && (
+                      <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    {!checkingUsername && usernameAvailable === false && (
+                      <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                {formData.username.length > 0 && formData.username.length < 3 && (
+                  <p className="text-xs text-yellow-400 mt-1">Username must be at least 3 characters</p>
+                )}
+                {usernameAvailable === false && (
+                  <p className="text-xs text-red-400 mt-1">This username is already taken</p>
+                )}
+                {usernameAvailable === true && (
+                  <p className="text-xs text-green-400 mt-1">Your referral link: buddy.ai/{formData.username.toLowerCase()}</p>
+                )}
+              </div>
+
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>

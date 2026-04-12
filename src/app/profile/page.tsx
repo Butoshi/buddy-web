@@ -174,7 +174,7 @@ export default function ProfilePage() {
   // Copy referral link
   const copyReferralLink = () => {
     if (referralData?.referral_code) {
-      const link = `${window.location.origin}/buy?ref=${referralData.referral_code}`;
+      const link = `${window.location.origin}/${referralData.referral_code}`;
       navigator.clipboard.writeText(link);
       setCopiedReferral(true);
       setTimeout(() => setCopiedReferral(false), 2000);
@@ -448,7 +448,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/buy?ref=${referralData.referral_code}`}
+                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/${referralData.referral_code}`}
                       readOnly
                       className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-mono"
                     />
