@@ -1,43 +1,75 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import BuddyLogo from "@/components/BuddyLogo";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
+import NavbarPro from "@/components/NavbarPro";
+import FooterPro from "@/components/FooterPro";
 
 export default function ReferralPage() {
   const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalReferrers: 0,
+    totalPaid: 0,
+    thisWeek: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real-time stats
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        // Get total referrers who earned
+        const { count: referrersCount } = await supabase
+          .from('referrals')
+          .select('*', { count: 'exact', head: true })
+          .gt('total_sales', 0);
+
+        // Get total paid
+        const { data: referralsData } = await supabase
+          .from('referrals')
+          .select('paid_earnings');
+
+        const totalPaid = referralsData?.reduce((sum, r) => sum + (r.paid_earnings || 0), 0) || 0;
+
+        // Get sales this week
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const { count: weekCount } = await supabase
+          .from('referral_sales')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', oneWeekAgo.toISOString());
+
+        setStats({
+          totalReferrers: referrersCount || 0,
+          totalPaid: totalPaid,
+          thisWeek: weekCount || 0,
+        });
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchStats();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-white/5 bg-background/95 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <BuddyLogo width={34} height={30} />
-            </div>
-            <span className="text-xl font-black">Buddy</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            {user ? (
-              <Link href="/profile" className="px-4 py-2 rounded-xl btn-glow text-white font-semibold text-sm">
-                My Referral Link
-              </Link>
-            ) : (
-              <Link href="/register" className="px-4 py-2 rounded-xl btn-glow text-white font-semibold text-sm">
-                Get Started
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+      <NavbarPro />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden pt-24">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-[200px]" />
-          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-pink-500/20 rounded-full blur-[200px]" />
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[200px]" />
+          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[200px]" />
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 py-20 text-center">
@@ -46,7 +78,7 @@ export default function ReferralPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-6">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -55,7 +87,7 @@ export default function ReferralPage() {
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6">
               Earn{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 1 SOL
               </span>
               {" "}For Every Sale
@@ -94,12 +126,45 @@ export default function ReferralPage() {
         </div>
       </section>
 
+      {/* Live Stats Counter */}
+      <section className="py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-2xl p-6"
+          >
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-muted">Live Stats</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🔥</span>
+                <span className="text-lg">
+                  <span className="font-black text-primary">{loading ? "..." : stats.thisWeek}</span>
+                  {" "}people earned SOL this week
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">💰</span>
+                <span className="text-lg">
+                  Total paid:{" "}
+                  <span className="font-black text-accent">{loading ? "..." : stats.totalPaid.toFixed(0)} SOL</span>
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Stats */}
       <section className="py-12 border-y border-white/5">
         <div className="max-w-4xl mx-auto px-4">
           <div className="grid grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-purple-400">1 SOL</div>
+              <div className="text-3xl sm:text-4xl font-black text-primary">1 SOL</div>
               <div className="text-sm text-muted mt-1">Per Referral</div>
             </div>
             <div>
@@ -107,7 +172,7 @@ export default function ReferralPage() {
               <div className="text-sm text-muted mt-1">Earnings</div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-pink-400">Weekly</div>
+              <div className="text-3xl sm:text-4xl font-black text-accent">Weekly</div>
               <div className="text-sm text-muted mt-1">Payouts</div>
             </div>
           </div>
@@ -127,34 +192,29 @@ export default function ReferralPage() {
                 step: "1",
                 title: "Create Your Account",
                 description: "Sign up and choose your unique username. This becomes your referral link.",
-                icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
-                color: "purple"
               },
               {
                 step: "2",
                 title: "Share Your Link",
                 description: "Share your personalized link (buddy.com/yourname) on Twitter, Discord, Telegram, etc.",
-                icon: "M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z",
-                color: "pink"
               },
               {
                 step: "3",
                 title: "Earn SOL",
                 description: "When someone buys Buddy using your link, you earn 1 SOL. Paid weekly to your wallet.",
-                icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-                color: "green"
               }
-            ].map((item) => (
+            ].map((item, index) => (
               <motion.div
                 key={item.step}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
                 className="relative"
               >
-                <div className={`p-6 rounded-2xl bg-${item.color}-500/5 border border-${item.color}-500/20`}>
-                  <div className={`w-12 h-12 rounded-xl bg-${item.color}-500/20 flex items-center justify-center mb-4`}>
-                    <span className={`text-xl font-black text-${item.color}-400`}>{item.step}</span>
+                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/30 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-4">
+                    <span className="text-xl font-black text-white">{item.step}</span>
                   </div>
                   <h3 className="text-xl font-bold mb-2">{item.title}</h3>
                   <p className="text-muted text-sm">{item.description}</p>
@@ -177,7 +237,7 @@ export default function ReferralPage() {
 
           <div className="bg-card/50 backdrop-blur-xl rounded-2xl border border-white/10 p-8 text-center">
             <div className="text-sm text-muted mb-2">Your referral link looks like:</div>
-            <div className="text-2xl sm:text-3xl font-mono font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-6">
+            <div className="text-2xl sm:text-3xl font-mono font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-6">
               buddy.com/yourname
             </div>
             <div className="flex flex-wrap justify-center gap-3">
@@ -209,11 +269,11 @@ export default function ReferralPage() {
             ].map((tier) => (
               <div
                 key={tier.referrals}
-                className="p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 text-center"
+                className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center hover:border-primary/40 transition-colors"
               >
                 <div className="text-4xl font-black text-white mb-2">{tier.referrals}</div>
                 <div className="text-sm text-muted mb-4">Referrals</div>
-                <div className="text-2xl font-bold text-purple-400">{tier.sol} SOL</div>
+                <div className="text-2xl font-bold text-primary">{tier.sol} SOL</div>
                 <div className="text-sm text-muted">{tier.usd}</div>
               </div>
             ))}
@@ -298,12 +358,7 @@ export default function ReferralPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-8">
-        <div className="max-w-4xl mx-auto px-4 text-center text-sm text-muted">
-          <p>&copy; 2024 Buddy. All rights reserved.</p>
-        </div>
-      </footer>
+      <FooterPro />
     </div>
   );
 }
