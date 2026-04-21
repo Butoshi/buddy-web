@@ -141,14 +141,12 @@ export default function ReferralPage() {
                 <span className="text-muted">Live Stats</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🔥</span>
                 <span className="text-lg">
                   <span className="font-black text-primary">{loading ? "..." : stats.thisWeek}</span>
                   {" "}people earned SOL this week
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">💰</span>
                 <span className="text-lg">
                   Total paid:{" "}
                   <span className="font-black text-accent">{loading ? "..." : stats.totalPaid.toFixed(0)} SOL</span>
@@ -172,7 +170,7 @@ export default function ReferralPage() {
               <div className="text-sm text-muted mt-1">Earnings</div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-accent">Weekly</div>
+              <div className="text-3xl sm:text-4xl font-black text-accent">Daily</div>
               <div className="text-sm text-muted mt-1">Payouts</div>
             </div>
           </div>
@@ -201,7 +199,7 @@ export default function ReferralPage() {
               {
                 step: "3",
                 title: "Earn SOL",
-                description: "When someone buys Buddy using your link, you earn 1 SOL. Paid weekly to your wallet.",
+                description: "When someone buys Buddy using your link, you earn 1 SOL. Paid daily to your wallet.",
               }
             ].map((item, index) => (
               <motion.div
@@ -251,40 +249,6 @@ export default function ReferralPage() {
         </div>
       </section>
 
-      {/* Earnings Calculator */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-black text-center mb-4">
-            Potential Earnings
-          </h2>
-          <p className="text-muted text-center mb-12">
-            See how much you could earn with referrals
-          </p>
-
-          <div className="grid sm:grid-cols-3 gap-6">
-            {[
-              { referrals: 5, sol: 5, usd: "~$400" },
-              { referrals: 20, sol: 20, usd: "~$1,600" },
-              { referrals: 100, sol: 100, usd: "~$8,000" },
-            ].map((tier) => (
-              <div
-                key={tier.referrals}
-                className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center hover:border-primary/40 transition-colors"
-              >
-                <div className="text-4xl font-black text-white mb-2">{tier.referrals}</div>
-                <div className="text-sm text-muted mb-4">Referrals</div>
-                <div className="text-2xl font-bold text-primary">{tier.sol} SOL</div>
-                <div className="text-sm text-muted">{tier.usd}</div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center text-xs text-muted mt-6">
-            *USD estimates based on SOL price. Actual earnings depend on market conditions.
-          </p>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section className="py-20 bg-white/[0.02]">
         <div className="max-w-3xl mx-auto px-4">
@@ -300,7 +264,7 @@ export default function ReferralPage() {
               },
               {
                 q: "When do I get paid?",
-                a: "Referral commissions are paid weekly. Make sure to add your Solana wallet address in your Profile to receive payments."
+                a: "Referral commissions are paid daily. Make sure to add your Solana wallet address in your Profile to receive payments."
               },
               {
                 q: "Is there a limit to how much I can earn?",
