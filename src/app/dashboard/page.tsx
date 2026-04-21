@@ -227,9 +227,7 @@ export default function DashboardPage() {
             {/* Logo + Mobile menu */}
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <BuddyLogo size={34} trackMouse={false} breathe={false} />
-                </div>
+                <BuddyLogo size={44} trackMouse={false} breathe={false} />
                 <span className="text-xl font-black hidden sm:block">Buddy</span>
               </Link>
 

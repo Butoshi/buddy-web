@@ -43,9 +43,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12">
         <div className="relative z-10 max-w-md">
           <Link href="/" className="flex items-center gap-3 mb-12">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <BuddyLogo size={38} trackMouse={false} breathe={false} />
-            </div>
+            <BuddyLogo size={48} trackMouse={false} breathe={false} />
             <span className="text-3xl font-black">Buddy</span>
           </Link>
 
@@ -89,9 +87,7 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <BuddyLogo size={34} trackMouse={false} breathe={false} />
-              </div>
+              <BuddyLogo size={44} trackMouse={false} breathe={false} />
               <span className="text-2xl font-black">Buddy</span>
             </Link>
           </div>
