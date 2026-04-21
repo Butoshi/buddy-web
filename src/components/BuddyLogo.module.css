@@ -19,6 +19,7 @@
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
+  transform: scale(1.08);
 }
 
 .eyeBox {
