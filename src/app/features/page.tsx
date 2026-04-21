@@ -186,7 +186,7 @@ export default function FeaturesPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <BuddyLogo size={44} trackMouse={false} breathe={false} />
+            <BuddyLogo size={52} trackMouse={false} breathe={false} />
             <span className="text-xl font-black">Buddy</span>
           </Link>
 

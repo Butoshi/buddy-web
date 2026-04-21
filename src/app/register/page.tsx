@@ -160,7 +160,7 @@ export default function RegisterPage() {
           {/* Logo */}
           <div className="mb-8 text-center lg:text-left">
             <Link href="/" className="inline-flex items-center gap-3">
-              <BuddyLogo size={44} trackMouse={false} breathe={false} />
+              <BuddyLogo size={52} trackMouse={false} breathe={false} />
               <span className="text-2xl font-black">Buddy</span>
             </Link>
           </div>
