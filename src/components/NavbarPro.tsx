@@ -43,7 +43,7 @@ export default function NavbarPro() {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Animated Buddy Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <BuddyLogo size={48} trackMouse={false} breathe={false} />
+              <BuddyLogo size={48} trackMouse={true} breathe={false} />
               <span className="text-2xl font-black bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300">
                 Buddy
               </span>

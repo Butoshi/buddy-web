@@ -131,7 +131,7 @@ export default function BuyPage() {
       <div className="relative z-10 max-w-2xl mx-auto px-4 py-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 mb-12 justify-center">
-          <BuddyLogo size={56} trackMouse={false} breathe={false} />
+          <BuddyLogo size={56} trackMouse={true} breathe={false} />
           <span className="text-3xl font-black">Buddy</span>
         </Link>
 
