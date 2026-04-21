@@ -1,203 +1,163 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from 'react';
+import styles from './BuddyLogo.module.css';
 
-interface BuddyLogoProps {
-  width?: number;
-  height?: number;
+type BuddyLogoProps = {
+  /** Width / height in px (or any CSS size string). Default: 300. */
+  size?: number | string;
+  /** Whether the pupils follow the cursor. Default: true. */
+  trackMouse?: boolean;
+  /** Extra class applied to the wrapper. */
   className?: string;
-}
+  /** Path to the logo png. Default: /buddy-logo.png (put the file in public/). */
+  src?: string;
+  /** Show the breathing animation. Default: true. */
+  breathe?: boolean;
+};
 
 export default function BuddyLogo({
-  width = 40,
-  height = 35,
-  className = "",
+  size = 300,
+  trackMouse = true,
+  className = '',
+  src = '/buddy-logo.png',
+  breathe = true,
 }: BuddyLogoProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
-  const smoothRef = useRef({ x: 0, y: 0 });
-  const lidRef = useRef({ left: 0, right: 0 });
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const leftTrackRef = useRef<HTMLDivElement>(null);
+  const rightTrackRef = useRef<HTMLDivElement>(null);
+  const busyRef = useRef(false);
 
-  // Colors
-  const textColor = "#ffffff";   // white B (same as "Buddy" text)
-  const pupilColor = "#0f172a";  // dark blue pupils (site background)
-  const lidColor = "#ffffff";    // white eyelids (same as B)
+  const blink = useCallback(async () => {
+    const wrap = wrapRef.current;
+    if (!wrap || busyRef.current) return;
+    busyRef.current = true;
 
-  const drawBuddy = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    wrap.classList.add(styles.blinking);
+    await wait(130);
+    wrap.classList.remove(styles.blinking);
+    await wait(110);
 
-    const W = canvas.width;
-    const H = canvas.height;
-
-    ctx.clearRect(0, 0, W, H);
-
-    // Draw rotated "B" as the eye outline
-    ctx.save();
-    ctx.translate(W / 2, H / 2);
-    ctx.rotate(-Math.PI / 2); // Rotate -90 degrees
-
-    // Font settings - bold/black like "Buddy" text
-    const fontSize = Math.min(W, H) * 1.4;
-    ctx.font = `900 ${fontSize}px system-ui, -apple-system, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    // Draw the B
-    ctx.fillStyle = textColor;
-    ctx.fillText("B", 0, fontSize * 0.05);
-
-    ctx.restore();
-
-    // Pupil movement based on mouse
-    const maxDX = W * 0.04;
-    const maxDY = H * 0.04;
-    const pdx = smoothRef.current.x * maxDX;
-    const pdy = smoothRef.current.y * maxDY;
-
-    // Left pupil size (smaller hole of B)
-    const leftPupilW = W * 0.18;
-    const leftPupilH = H * 0.22;
-    const leftPupilR = Math.min(leftPupilW, leftPupilH) * 0.4;
-
-    // Right pupil size (bigger hole of B) - slightly larger
-    const rightPupilW = W * 0.20;
-    const rightPupilH = H * 0.24;
-    const rightPupilR = Math.min(rightPupilW, rightPupilH) * 0.4;
-
-    // Left eye position (smaller hole of B)
-    const leftEyeX = W * 0.30 + pdx;
-    const leftEyeY = H * 0.48 + pdy;
-
-    // Right eye position (bigger hole of B)
-    const rightEyeX = W * 0.68 + pdx;
-    const rightEyeY = H * 0.48 + pdy;
-
-    // Draw pupils (dark blue)
-    ctx.fillStyle = pupilColor;
-
-    // Left pupil
-    if (lidRef.current.left < 0.9) {
-      ctx.beginPath();
-      ctx.roundRect(leftEyeX - leftPupilW/2, leftEyeY - leftPupilH/2, leftPupilW, leftPupilH, leftPupilR);
-      ctx.fill();
+    // Occasional double-blink for a more organic feel
+    if (Math.random() < 0.25) {
+      await wait(110);
+      wrap.classList.add(styles.blinking);
+      await wait(110);
+      wrap.classList.remove(styles.blinking);
     }
 
-    // Right pupil
-    if (lidRef.current.right < 0.9) {
-      ctx.beginPath();
-      ctx.roundRect(rightEyeX - rightPupilW/2, rightEyeY - rightPupilH/2, rightPupilW, rightPupilH, rightPupilR);
-      ctx.fill();
-    }
-
-    // Eyelids (for blink - covers the pupils with white)
-    if (lidRef.current.left > 0) {
-      ctx.fillStyle = lidColor;
-      const lidH = leftPupilH * 1.5 * lidRef.current.left;
-      ctx.beginPath();
-      ctx.roundRect(leftEyeX - leftPupilW/2 - 2, leftEyeY - leftPupilH/2 - 2, leftPupilW + 4, lidH, leftPupilR);
-      ctx.fill();
-    }
-
-    if (lidRef.current.right > 0) {
-      ctx.fillStyle = lidColor;
-      const lidH = rightPupilH * 1.5 * lidRef.current.right;
-      ctx.beginPath();
-      ctx.roundRect(rightEyeX - rightPupilW/2 - 2, rightEyeY - rightPupilH/2 - 2, rightPupilW + 4, lidH, rightPupilR);
-      ctx.fill();
-    }
+    busyRef.current = false;
   }, []);
 
-  const animateLid = useCallback(
-    (targetL: number, targetR: number, duration: number, delayR: number, onDone?: () => void) => {
-      const startL = lidRef.current.left;
-      const startR = lidRef.current.right;
-      const t0 = performance.now();
-
-      const step = (t: number) => {
-        const elapsed = t - t0;
-        const progressL = Math.min(elapsed / duration, 1);
-        const easedL = progressL < 0.5 ? 2 * progressL * progressL : -1 + (4 - 2 * progressL) * progressL;
-        lidRef.current.left = startL + (targetL - startL) * easedL;
-
-        const progressR = Math.min(Math.max(elapsed - delayR, 0) / duration, 1);
-        const easedR = progressR < 0.5 ? 2 * progressR * progressR : -1 + (4 - 2 * progressR) * progressR;
-        lidRef.current.right = startR + (targetR - startR) * easedR;
-
-        if (progressL < 1 || progressR < 1) {
-          requestAnimationFrame(step);
-        } else if (onDone) {
-          onDone();
-        }
-      };
-
-      requestAnimationFrame(step);
-    },
-    []
-  );
-
-  const blink = useCallback(() => {
-    animateLid(1, 1, 90, 30, () => {
-      setTimeout(() => animateLid(0, 0, 120, 30), 60);
-    });
-  }, [animateLid]);
-
+  // Auto-blink loop
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.x = Math.max(
-        -1,
-        Math.min(1, (e.clientX - window.innerWidth / 2) / (window.innerWidth * 0.5))
-      );
-      mouseRef.current.y = Math.max(
-        -1,
-        Math.min(1, (e.clientY - window.innerHeight / 2) / (window.innerHeight * 0.5))
-      );
-    };
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  useEffect(() => {
     const loop = () => {
-      smoothRef.current.x += (mouseRef.current.x - smoothRef.current.x) * 0.08;
-      smoothRef.current.y += (mouseRef.current.y - smoothRef.current.y) * 0.08;
-      drawBuddy();
-      animationRef.current = requestAnimationFrame(loop);
+      const delay = 2400 + Math.random() * 3600;
+      timer = setTimeout(async () => {
+        if (!active) return;
+        await blink();
+        if (active) loop();
+      }, delay);
     };
+    loop();
 
-    animationRef.current = requestAnimationFrame(loop);
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      active = false;
+      if (timer) clearTimeout(timer);
     };
-  }, [drawBuddy]);
-
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
-    const autoBlink = () => {
-      blink();
-      const nextBlink = 2500 + Math.random() * 2000;
-      timeoutId = setTimeout(autoBlink, nextBlink);
-    };
-
-    timeoutId = setTimeout(autoBlink, 1500);
-    return () => clearTimeout(timeoutId);
   }, [blink]);
 
+  // Mouse / touch tracking
+  useEffect(() => {
+    if (!trackMouse) return;
+
+    const handleMove = (clientX: number, clientY: number) => {
+      const wrap = wrapRef.current;
+      if (!wrap) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      const maxOffset = wrapRect.width * 0.022;
+
+      [leftTrackRef.current, rightTrackRef.current].forEach((track) => {
+        if (!track) return;
+        const r = track.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dx = clientX - cx;
+        const dy = clientY - cy;
+        const dist = Math.hypot(dx, dy) || 1;
+        const sat = Math.min(dist / 180, 1);
+        const off = maxOffset * sat;
+        track.style.setProperty('--tx', `${((dx / dist) * off).toFixed(2)}px`);
+        track.style.setProperty('--ty', `${((dy / dist) * off).toFixed(2)}px`);
+      });
+    };
+
+    const onMouseMove = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    };
+    const onLeave = () => {
+      [leftTrackRef.current, rightTrackRef.current].forEach((t) => {
+        if (!t) return;
+        t.style.setProperty('--tx', '0px');
+        t.style.setProperty('--ty', '0px');
+      });
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseleave', onLeave);
+    document.addEventListener('touchmove', onTouchMove, { passive: true });
+
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseleave', onLeave);
+      document.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [trackMouse]);
+
+  const sizeValue = typeof size === 'number' ? `${size}px` : size;
+
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className={className}
-      style={{ display: "block" }}
-    />
+    <div
+      ref={wrapRef}
+      onClick={blink}
+      role="img"
+      aria-label="Buddy"
+      className={[
+        styles.logo,
+        breathe ? styles.breathe : '',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{ width: sizeValue, height: sizeValue }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        draggable={false}
+        className={styles.base}
+      />
+
+      <div className={styles.eyeBox} style={{ left: '30.7%', top: '41.2%' }}>
+        <div className={styles.eyeWhite} />
+        <div ref={leftTrackRef} className={styles.eyeTrack}>
+          <div className={styles.eye} />
+        </div>
+      </div>
+
+      <div className={styles.eyeBox} style={{ left: '55.5%', top: '41.2%' }}>
+        <div className={styles.eyeWhite} />
+        <div ref={rightTrackRef} className={styles.eyeTrack}>
+          <div className={styles.eye} />
+        </div>
+      </div>
+    </div>
   );
 }

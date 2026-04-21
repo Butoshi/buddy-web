@@ -219,7 +219,7 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <BuddyLogo width={34} height={30} />
+              <BuddyLogo size={34} trackMouse={false} breathe={false} />
             </div>
             <span className="text-xl font-black">Buddy</span>
           </Link>

@@ -46,7 +46,7 @@ export default function NavbarPro() {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition" />
                 <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
-                  <BuddyLogo width={34} height={30} />
+                  <BuddyLogo size={34} trackMouse={false} breathe={false} />
                 </div>
               </div>
               <span className="text-2xl font-black bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300">
