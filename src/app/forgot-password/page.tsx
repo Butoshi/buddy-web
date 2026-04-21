@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-3">
-            <BuddyLogo size={52} trackMouse={false} breathe={false} />
+            <BuddyLogo size={48} trackMouse={false} breathe={false} />
             <span className="text-2xl font-black">Buddy</span>
           </Link>
         </div>

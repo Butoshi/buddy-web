@@ -10,7 +10,7 @@ export default function TermsPage() {
       <header className="border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 py-6">
           <Link href="/" className="flex items-center gap-3">
-            <BuddyLogo size={52} trackMouse={false} breathe={false} />
+            <BuddyLogo size={48} trackMouse={false} breathe={false} />
             <span className="text-xl font-black">Buddy</span>
           </Link>
         </div>
