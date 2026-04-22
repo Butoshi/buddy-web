@@ -30,8 +30,8 @@
 
 .eyeWhite {
   position: absolute;
-  inset: 0;
-  background: #FEFEFE;
+  inset: -1px;
+  background: #FFFFFF;
   border-radius: 26%;
 }
 
