@@ -52,7 +52,7 @@
 }
 
 .logo.blinking .eye {
-  transform: scaleY(0.06);
+  transform: scaleY(0);
 }
 
 @keyframes buddyBreathe {
