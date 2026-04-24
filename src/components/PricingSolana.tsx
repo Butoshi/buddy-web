@@ -9,8 +9,8 @@ import { useAuth } from "@/context/AuthContext";
 
 // Configuration
 const SELLER_WALLET = "BYj4j8om2BrZEKp1NuBC8mzod6bFrD4pLBqgmmnbXStj";
-const PROMO_PRICE = 6; // SOL
-const NORMAL_PRICE = 8; // SOL
+const PROMO_PRICE = 0.01; // SOL - TEST
+const NORMAL_PRICE = 0.01; // SOL - TEST
 const PROMO_DURATION_HOURS = 72;
 // Date de fin de la promo (72h à partir du lancement)
 const PROMO_END_DATE = new Date("2026-04-27T17:00:00Z"); // 72h from now
