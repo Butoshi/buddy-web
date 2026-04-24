@@ -87,12 +87,6 @@ export default function FooterPro() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
-                <Link
-                  href="#demo"
-                  className="px-8 py-4 rounded-2xl font-semibold border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all"
-                >
-                  Watch Demo
-                </Link>
               </div>
             </div>
           </div>
