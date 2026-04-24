@@ -508,7 +508,7 @@ export default function BuyPage() {
 
         {/* Help */}
         <p className="text-center text-muted mt-8">
-          Need help? <a href="#" className="text-primary hover:text-accent">Follow us on Twitter</a>
+          Need help? <a href="https://t.me/ButoShi" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent">Contact us on Telegram</a>
         </p>
         </>
         )}

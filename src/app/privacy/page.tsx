@@ -175,9 +175,8 @@ export default function PrivacyPage() {
             <p className="text-muted leading-relaxed">
               If you have any questions about this Privacy Policy, please contact us:
             </p>
-            <div className="mt-4 space-y-2">
-              <p className="text-muted">Email: <span className="text-primary">privacy@buddy.ai</span></p>
-              <p className="text-muted">Support: <span className="text-primary">support@buddy.ai</span></p>
+            <div className="mt-4">
+              <p className="text-muted">Telegram: <a href="https://t.me/ButoShi" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent">@ButoShi</a></p>
             </div>
           </section>
         </div>

@@ -138,7 +138,11 @@ export default function TermsPage() {
             <p className="text-muted leading-relaxed">
               If you have any questions about these Terms of Service, please contact us at:
             </p>
-            <p className="text-primary mt-2">support@buddy.ai</p>
+            <p className="text-primary mt-2">
+              <a href="https://t.me/ButoShi" target="_blank" rel="noopener noreferrer" className="hover:text-accent">
+                Telegram: @ButoShi
+              </a>
+            </p>
           </section>
         </div>
 
