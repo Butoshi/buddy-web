@@ -6,8 +6,8 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const WALLET_ADDRESS = process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS!;
-const PROMO_PRICE = 0.01; // SOL - TEST
-const NORMAL_PRICE = 0.01; // SOL - TEST
+const PROMO_PRICE = 6; // SOL
+const NORMAL_PRICE = 8; // SOL
 const PROMO_END_DATE = new Date("2026-04-27T17:00:00Z");
 const LAMPORTS_PER_SOL = 1_000_000_000;
 
