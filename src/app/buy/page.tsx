@@ -9,8 +9,8 @@ import { useAuth } from "@/context/AuthContext";
 import BuddyLogo from "@/components/BuddyLogo";
 
 const WALLET_ADDRESS = process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS || "8UJLeuDZpQSDdJTQry2JrRN3B1hSjrmp7p1K1N7zHyDD";
-const PROMO_PRICE = 6;
-const NORMAL_PRICE = 8;
+const PROMO_PRICE = 0.01; // TEST MODE
+const NORMAL_PRICE = 0.01; // TEST MODE
 // Date de fin de la promo (72h à partir du lancement)
 const PROMO_END_DATE = new Date("2026-04-27T17:00:00Z");
 
