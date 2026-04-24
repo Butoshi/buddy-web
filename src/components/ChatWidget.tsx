@@ -13,7 +13,7 @@ interface Message {
 const botResponses: { [key: string]: string } = {
   hello: "Hey! I'm Buddy, your AI trading agent for PumpFun. Ask me anything about memecoin trading!",
   pumpfun: "PumpFun is where new memecoins launch on Solana every minute. I monitor it 24/7 and snipe the best opportunities for you!",
-  price: "We offer monthly subscription at $49/month or lifetime access at $299. Check out our pricing section for details!",
+  price: "One-time payment in SOL for lifetime access - currently 6 SOL during our launch promo (normally 8 SOL). No subscription, no hidden fees!",
   how: "I run locally on your PC, connected to your Solana wallet. When a new token on PumpFun matches your filters, I buy it in milliseconds - faster than any human!",
   safe: "100% safe! I run on YOUR computer. Your private keys never leave your machine. I can't access your wallet without you - everything is local and encrypted.",
   rug: "I have built-in rug protection! I analyze dev wallets, liquidity, holder distribution, and more. You can set filters to avoid suspicious tokens.",

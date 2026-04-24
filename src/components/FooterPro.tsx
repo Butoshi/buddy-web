@@ -74,7 +74,7 @@ export default function FooterPro() {
                   </span>
                 </h3>
                 <p className="text-muted text-lg max-w-md">
-                  Join 10,000+ traders catching gems on PumpFun every day. Get started now.
+                  Be among the first to catch gems on PumpFun with AI. Get started now.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-4">

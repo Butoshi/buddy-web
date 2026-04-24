@@ -39,10 +39,10 @@ const testimonials = [
 ];
 
 const liveStats = [
-  { label: "Total Volume Traded", value: "$12.4M", prefix: "" },
-  { label: "Tokens Analyzed", value: "2.1M", prefix: "" },
-  { label: "Successful Trades", value: "847K", prefix: "" },
-  { label: "Avg. ROI", value: "340%", prefix: "+" },
+  { label: "New Tokens/Day", value: "5K", prefix: "+" },
+  { label: "Detection Speed", value: "0.5s", prefix: "<" },
+  { label: "AI Accuracy", value: "85%", prefix: "" },
+  { label: "Uptime", value: "99.9%", prefix: "" },
 ];
 
 function AnimatedNumber({ value, prefix = "" }: { value: string; prefix?: string }) {
@@ -112,9 +112,9 @@ export default function SocialProof() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6"
           >
-            Trusted by{" "}
+            Built for{" "}
             <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-              10,000+
+              Serious
             </span>{" "}
             Degens
           </motion.h2>
@@ -125,7 +125,7 @@ export default function SocialProof() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-xl text-muted max-w-2xl mx-auto"
           >
-            Join the community of traders catching gems on PumpFun every day.
+            Be among the first to catch gems on PumpFun with AI-powered trading.
           </motion.p>
         </div>
 

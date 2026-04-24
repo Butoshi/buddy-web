@@ -60,7 +60,7 @@ export default function Testimonials() {
             transition={{ delay: 0.2 }}
             className="text-muted text-lg max-w-2xl mx-auto"
           >
-            Join thousands of traders sniping memecoins with Buddy.
+            See what early testers are saying about Buddy.
           </motion.p>
         </div>
 

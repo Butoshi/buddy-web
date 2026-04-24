@@ -44,8 +44,8 @@ export default function CTASection() {
             transition={{ delay: 0.2 }}
             className="text-muted text-lg mb-10 max-w-2xl mx-auto"
           >
-            Join thousands of traders who are already using Buddy to automate their strategies.
-            Start your free 7-day trial today. No credit card required.
+            Be among the first to automate your memecoin trading with AI.
+            One-time payment in SOL. Lifetime access. No subscription.
           </motion.p>
 
           <motion.div
@@ -56,7 +56,7 @@ export default function CTASection() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link href="/register" className="w-full sm:w-auto btn-glow text-white px-10 py-4 rounded-xl font-semibold text-lg">
-              Start Free Trial
+              Get Started
             </Link>
             <Link
               href="#pricing"
@@ -73,7 +73,7 @@ export default function CTASection() {
             transition={{ delay: 0.4 }}
             className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-muted"
           >
-            {["7-day free trial", "No credit card required", "Cancel anytime"].map((item, index) => (
+            {["One-time payment", "Lifetime access", "Free updates forever"].map((item, index) => (
               <div key={index} className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

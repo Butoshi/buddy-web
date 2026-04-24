@@ -59,15 +59,15 @@ export default function FinalCTA() {
 
           <p className="text-xl text-muted max-w-2xl mx-auto mb-10">
             While you sleep, Buddy is finding the next big memecoin on PumpFun.
-            Join thousands of traders who automated their success.
+            Be among the first to automate your trading success.
           </p>
 
           {/* Stats */}
           <div className="flex flex-wrap justify-center gap-8 mb-12">
             {[
-              { value: "10K+", label: "Active Traders" },
-              { value: "$2M+", label: "Volume Traded" },
-              { value: "73%", label: "Avg Win Rate" },
+              { value: "24/7", label: "Monitoring" },
+              { value: "<1s", label: "Reaction Time" },
+              { value: "100%", label: "Local & Secure" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}

@@ -15,9 +15,9 @@ export default function StatsSection() {
           viewport={{ once: true }}
           className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12"
         >
-          <AnimatedCounter end={2847563} prefix="$" label="Total Volume Traded" />
-          <AnimatedCounter end={12847} label="Trades Executed" />
-          <AnimatedCounter end={3250} suffix="+" label="Active Traders" />
+          <AnimatedCounter end={5000} suffix="+" label="New Tokens/Day on PumpFun" />
+          <AnimatedCounter end={500} suffix="ms" label="Avg. Detection Time" />
+          <AnimatedCounter end={85} suffix="%" label="AI Accuracy" />
           <AnimatedCounter end={99} suffix="%" label="Uptime" />
         </motion.div>
       </div>

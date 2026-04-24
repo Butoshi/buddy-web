@@ -129,7 +129,7 @@ export default function PrivacyPage() {
               <li><strong>Opt-out:</strong> Opt out of marketing communications</li>
             </ul>
             <p className="text-muted leading-relaxed mt-4">
-              To exercise these rights, please contact us at privacy@buddy.ai
+              To exercise these rights, please contact us on <a href="https://t.me/ButoShi" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-accent">Telegram (@ButoShi)</a>
             </p>
           </section>
 

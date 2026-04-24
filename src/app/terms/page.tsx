@@ -83,17 +83,24 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">6. Subscription and Payments</h2>
+            <h2 className="text-2xl font-bold mb-4">6. Payment and License</h2>
             <p className="text-muted leading-relaxed mb-4">
-              Buddy offers subscription-based access to the Service:
+              Buddy offers lifetime access through a one-time payment:
             </p>
             <ul className="list-disc list-inside text-muted space-y-2">
-              <li>Monthly subscription: $49/month, billed monthly</li>
-              <li>Lifetime access: One-time payment of $299</li>
-              <li>Payments are processed through secure third-party providers</li>
-              <li>Subscriptions auto-renew unless cancelled</li>
-              <li>Refunds are available within 7 days of purchase if the Service has not been used</li>
+              <li>One-time payment in SOL (Solana) for lifetime access</li>
+              <li>Payments are made directly on the Solana blockchain</li>
+              <li>Upon payment verification, you receive a unique license key</li>
+              <li>No subscription or recurring fees</li>
+              <li>All future updates included</li>
             </ul>
+            <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 mt-4">
+              <p className="text-yellow-400 font-semibold mb-2">No Refunds Policy</p>
+              <p className="text-muted text-sm">
+                Due to the nature of blockchain transactions, all sales are final. Cryptocurrency payments
+                cannot be reversed or refunded. Please ensure you understand the product before purchasing.
+              </p>
+            </div>
           </section>
 
           <section>
@@ -120,7 +127,7 @@ export default function TermsPage() {
             <p className="text-muted leading-relaxed">
               We reserve the right to terminate or suspend your account at any time for any reason, including
               but not limited to violation of these Terms. Upon termination, your right to use the Service
-              will immediately cease. You may cancel your subscription at any time through your account settings.
+              will immediately cease. Your license key may be revoked in case of Terms violation.
             </p>
           </section>
 
