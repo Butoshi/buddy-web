@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 // Configuration
-const SELLER_WALLET = "8UJLeuDZpQSDdJTQry2JrRN3B1hSjrmp7p1K1N7zHyDD";
+const SELLER_WALLET = "BYj4j8om2BrZEKp1NuBC8mzod6bFrD4pLBqgmmnbXStj";
 const PROMO_PRICE = 6; // SOL
 const NORMAL_PRICE = 8; // SOL
 const PROMO_DURATION_HOURS = 72;
