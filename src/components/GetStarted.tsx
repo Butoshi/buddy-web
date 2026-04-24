@@ -8,7 +8,7 @@ const steps = [
   {
     number: "01",
     title: "Pay in SOL",
-    description: "Send payment to our wallet. Early bird: 6 SOL (first 20 buyers), then 8 SOL.",
+    description: "Send payment to our wallet. Launch promo: 6 SOL for 72h, then 8 SOL.",
     icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
     color: "from-purple-500 to-pink-500",
   },

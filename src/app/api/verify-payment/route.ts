@@ -6,8 +6,17 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const WALLET_ADDRESS = process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS!;
-const REQUIRED_SOL = 6; // 6 SOL minimum
+const PROMO_PRICE = 6;
+const NORMAL_PRICE = 8;
+const PROMO_END_DATE = new Date("2026-04-27T17:00:00Z");
 const LAMPORTS_PER_SOL = 1_000_000_000;
+
+// Calculate current price based on promo
+function getCurrentPrice(): number {
+  const now = new Date().getTime();
+  const end = PROMO_END_DATE.getTime();
+  return now < end ? PROMO_PRICE : NORMAL_PRICE;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,7 +106,7 @@ export async function POST(request: NextRequest) {
           const info = ix.parsed.info;
           if (info.destination === WALLET_ADDRESS && info.source === buyerWallet) {
             transferAmount = info.lamports / LAMPORTS_PER_SOL;
-            if (transferAmount >= REQUIRED_SOL) {
+            if (transferAmount >= getCurrentPrice()) {
               isValidPayment = true;
               break;
             }
@@ -114,7 +123,7 @@ export async function POST(request: NextRequest) {
               const info = ix.parsed.info;
               if (info.destination === WALLET_ADDRESS && info.source === buyerWallet) {
                 transferAmount = info.lamports / LAMPORTS_PER_SOL;
-                if (transferAmount >= REQUIRED_SOL) {
+                if (transferAmount >= getCurrentPrice()) {
                   isValidPayment = true;
                   break;
                 }
@@ -200,7 +209,7 @@ export async function POST(request: NextRequest) {
 
     // No valid payment found
     return NextResponse.json({
-      error: `No payment of ${REQUIRED_SOL} SOL or more found from your wallet. Please make sure you sent the payment and wait a few seconds for confirmation.`
+      error: `No payment of ${getCurrentPrice()} SOL or more found from your wallet. Please make sure you sent the payment and wait a few seconds for confirmation.`
     }, { status: 404 });
 
   } catch (error) {

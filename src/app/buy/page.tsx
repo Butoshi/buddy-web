@@ -9,7 +9,10 @@ import { useAuth } from "@/context/AuthContext";
 import BuddyLogo from "@/components/BuddyLogo";
 
 const WALLET_ADDRESS = process.env.NEXT_PUBLIC_SOLANA_WALLET_ADDRESS || "8UJLeuDZpQSDdJTQry2JrRN3B1hSjrmp7p1K1N7zHyDD";
-const PRICE_SOL = 6;
+const PROMO_PRICE = 6;
+const NORMAL_PRICE = 8;
+// Date de fin de la promo (72h à partir du lancement)
+const PROMO_END_DATE = new Date("2026-04-27T17:00:00Z");
 
 // Component to capture referral code from URL
 function ReferralCapture({ onCapture }: { onCapture: (code: string | null) => void }) {
@@ -42,7 +45,40 @@ export default function BuyPage() {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [verifyAttempts, setVerifyAttempts] = useState(0);
 
+  // Countdown state
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [isPromoActive, setIsPromoActive] = useState(true);
+
   const { user, loading } = useAuth();
+
+  // Countdown timer
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const end = PROMO_END_DATE.getTime();
+      const difference = end - now;
+
+      if (difference <= 0) {
+        setIsPromoActive(false);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      setIsPromoActive(true);
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((difference % (1000 * 60)) / 1000),
+      });
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentPrice = isPromoActive ? PROMO_PRICE : NORMAL_PRICE;
 
   const copyAddress = () => {
     navigator.clipboard.writeText(WALLET_ADDRESS);
@@ -212,10 +248,48 @@ export default function BuyPage() {
               <p className="text-muted text-center mb-8">Enter your Solana wallet address to get started</p>
 
               <div className="bg-white/5 rounded-2xl p-6 mb-6">
+                {/* Promo badge */}
+                {isPromoActive && (
+                  <div className="flex justify-center mb-4">
+                    <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm font-bold flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+                      </svg>
+                      LAUNCH PROMO
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-muted">Price</span>
-                  <span className="text-3xl font-black text-primary">{PRICE_SOL} SOL</span>
+                  <div className="text-right">
+                    {isPromoActive && (
+                      <span className="text-lg text-muted line-through mr-2">{NORMAL_PRICE} SOL</span>
+                    )}
+                    <span className="text-3xl font-black text-primary">{currentPrice} SOL</span>
+                  </div>
                 </div>
+
+                {/* Countdown timer */}
+                {isPromoActive && (
+                  <div className="mb-4">
+                    <p className="text-xs text-muted text-center mb-2">Promo ends in:</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { value: timeLeft.days, label: "Days" },
+                        { value: timeLeft.hours, label: "Hours" },
+                        { value: timeLeft.minutes, label: "Min" },
+                        { value: timeLeft.seconds, label: "Sec" },
+                      ].map((item) => (
+                        <div key={item.label} className="text-center p-2 rounded-lg bg-white/5 border border-white/10">
+                          <div className="text-lg font-bold text-primary">{item.value.toString().padStart(2, "0")}</div>
+                          <div className="text-xs text-muted">{item.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="text-sm text-muted">One-time payment • Lifetime access • All updates included</div>
               </div>
 
@@ -252,7 +326,7 @@ export default function BuyPage() {
           {step === "pay" && (
             <>
               <h1 className="text-3xl font-black text-center mb-2">Send Payment</h1>
-              <p className="text-muted text-center mb-8">Send {PRICE_SOL} SOL from your wallet</p>
+              <p className="text-muted text-center mb-8">Send {currentPrice} SOL from your wallet</p>
 
               {/* Your wallet reminder */}
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 mb-6">
@@ -265,7 +339,7 @@ export default function BuyPage() {
               <div className="flex justify-center mb-6">
                 <div className="bg-white p-4 rounded-2xl">
                   <QRCodeSVG
-                    value={`solana:${WALLET_ADDRESS}?amount=${PRICE_SOL}`}
+                    value={`solana:${WALLET_ADDRESS}?amount=${currentPrice}`}
                     size={200}
                     level="H"
                   />
@@ -274,7 +348,7 @@ export default function BuyPage() {
 
               {/* Wallet Address */}
               <div className="mb-6">
-                <label className="block text-sm text-muted mb-2">Send {PRICE_SOL} SOL to:</label>
+                <label className="block text-sm text-muted mb-2">Send {currentPrice} SOL to:</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
@@ -293,7 +367,7 @@ export default function BuyPage() {
 
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 mb-6">
                 <p className="text-yellow-400 text-sm">
-                  <strong>Important:</strong> Send exactly {PRICE_SOL} SOL or more from the wallet you entered. After sending, click the button below.
+                  <strong>Important:</strong> Send exactly {currentPrice} SOL or more from the wallet you entered. After sending, click the button below.
                 </p>
               </div>
 
@@ -328,7 +402,7 @@ export default function BuyPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted">Amount</span>
-                  <span className="font-bold text-primary">{PRICE_SOL} SOL</span>
+                  <span className="font-bold text-primary">{currentPrice} SOL</span>
                 </div>
               </div>
 

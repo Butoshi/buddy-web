@@ -9,9 +9,11 @@ import { useAuth } from "@/context/AuthContext";
 
 // Configuration
 const SELLER_WALLET = "8UJLeuDZpQSDdJTQry2JrRN3B1hSjrmp7p1K1N7zHyDD";
-const EARLY_BIRD_PRICE = 6; // SOL
+const PROMO_PRICE = 6; // SOL
 const NORMAL_PRICE = 8; // SOL
-const EARLY_BIRD_LIMIT = 20;
+const PROMO_DURATION_HOURS = 72;
+// Date de fin de la promo (72h à partir du lancement)
+const PROMO_END_DATE = new Date("2026-04-27T17:00:00Z"); // 72h from now
 
 // Solana RPC endpoint (mainnet)
 const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
@@ -34,7 +36,6 @@ export default function PricingSolana() {
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
   const { user, loading } = useAuth();
 
-  const [soldCount, setSoldCount] = useState(0);
   const [copied, setCopied] = useState(false);
   const [buyerWallet, setBuyerWallet] = useState("");
   const [isWatching, setIsWatching] = useState(false);
@@ -42,17 +43,38 @@ export default function PricingSolana() {
   const [txSignature, setTxSignature] = useState<string | null>(null);
   const [checkCount, setCheckCount] = useState(0);
 
-  // Load sold count from localStorage
+  // Countdown state
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [isPromoActive, setIsPromoActive] = useState(true);
+
+  // Countdown timer
   useEffect(() => {
-    const saved = localStorage.getItem("buddy_sold_count");
-    if (saved) {
-      setSoldCount(parseInt(saved, 10));
-    }
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const end = PROMO_END_DATE.getTime();
+      const difference = end - now;
+
+      if (difference <= 0) {
+        setIsPromoActive(false);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      setIsPromoActive(true);
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((difference % (1000 * 60)) / 1000),
+      });
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  const isEarlyBird = soldCount < EARLY_BIRD_LIMIT;
-  const currentPrice = isEarlyBird ? EARLY_BIRD_PRICE : NORMAL_PRICE;
-  const spotsLeft = Math.max(0, EARLY_BIRD_LIMIT - soldCount);
+  const currentPrice = isPromoActive ? PROMO_PRICE : NORMAL_PRICE;
 
   // Solana Pay URL for QR code
   const solanaPayUrl = `solana:${SELLER_WALLET}?amount=${currentPrice}&label=Buddy%20AI&message=Buddy%20AI%20Agent%20Purchase`;
@@ -153,11 +175,8 @@ export default function PricingSolana() {
         setVerificationStatus("success");
 
         // Save purchase
-        const newSoldCount = soldCount + 1;
-        localStorage.setItem("buddy_sold_count", newSoldCount.toString());
         localStorage.setItem(`buddy_purchased_${buyerWallet}`, "true");
         localStorage.setItem("buddy_verified_wallet", buyerWallet);
-        setSoldCount(newSoldCount);
       }
     }, 5000); // Check every 5 seconds
 
@@ -165,7 +184,7 @@ export default function PricingSolana() {
       clearInterval(checkInterval);
       setIsWatching(false);
     };
-  }, [buyerWallet, checkPayment, soldCount, verificationStatus]);
+  }, [buyerWallet, checkPayment, verificationStatus]);
 
   const goToDownload = () => {
     localStorage.setItem("buddy_verified_wallet", buyerWallet);
@@ -226,14 +245,14 @@ export default function PricingSolana() {
           <div className="absolute -inset-[1px] bg-gradient-to-b from-primary to-accent rounded-3xl blur-sm opacity-50" />
 
           <div className="relative p-8 sm:p-12 rounded-3xl bg-card border border-transparent">
-            {/* Early bird badge */}
-            {isEarlyBird && (
+            {/* Promo badge with countdown */}
+            {isPromoActive && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <div className="px-6 py-2 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm font-bold shadow-lg shadow-orange-500/30 flex items-center gap-2">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
                   </svg>
-                  EARLY BIRD - {spotsLeft} spots left!
+                  LAUNCH PROMO - {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
                 </div>
               </div>
             )}
@@ -287,7 +306,7 @@ export default function PricingSolana() {
               <div className="flex flex-col items-center">
                 {/* Price display */}
                 <div className="text-center mb-6">
-                  {isEarlyBird && (
+                  {isPromoActive && (
                     <div className="text-muted line-through text-2xl mb-1">
                       {NORMAL_PRICE} SOL
                     </div>
@@ -345,18 +364,22 @@ export default function PricingSolana() {
                   )}
                 </div>
 
-                {/* Progress bar for early bird */}
-                {isEarlyBird && (
+                {/* Countdown timer display */}
+                {isPromoActive && (
                   <div className="w-full mt-6">
-                    <div className="flex justify-between text-sm text-muted mb-2">
-                      <span>{soldCount} sold</span>
-                      <span>{EARLY_BIRD_LIMIT} early bird spots</span>
-                    </div>
-                    <div className="h-3 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full transition-all duration-500"
-                        style={{ width: `${(soldCount / EARLY_BIRD_LIMIT) * 100}%` }}
-                      />
+                    <p className="text-sm text-muted mb-3 text-center">Promo ends in:</p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { value: timeLeft.days, label: "Days" },
+                        { value: timeLeft.hours, label: "Hours" },
+                        { value: timeLeft.minutes, label: "Min" },
+                        { value: timeLeft.seconds, label: "Sec" },
+                      ].map((item) => (
+                        <div key={item.label} className="text-center p-2 rounded-xl bg-white/5 border border-white/10">
+                          <div className="text-2xl font-bold text-primary">{item.value.toString().padStart(2, "0")}</div>
+                          <div className="text-xs text-muted">{item.label}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
